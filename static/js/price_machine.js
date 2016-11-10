@@ -58,12 +58,17 @@ $(document).ready(function(){
           return x + y;}, 0);
         compute_puerto_and_update_view(cif_total_eur, weight);
         compute_despachante_and_update_view(cif_total_eur);
+        compute_vat_and_update_view(cif_total_eur);
         return cif_total_eur;
       }
     };
   }());
 
-  // Start of price simulation
+  /*
+   * Collect information from the user to create CIF
+   * Start of price simulation
+   */
+
   $('#input_price').change(function(){
     // Retrieving purchase price
     var purchase_price = $(this).val();
@@ -111,6 +116,10 @@ $(document).ready(function(){
     }
   });
 
+  /*
+   * The following functions are called at every CIF update
+   */
+
   function compute_puerto_and_update_view(cif_value_eur, weight){
     var cif_value_usd = XE.from_eur_to_usd(cif_value_eur);
     var ratio = cif_value_usd / weight;
@@ -124,8 +133,8 @@ $(document).ready(function(){
       return result;
     }(ratio)); //lookup in table based on the ratio
 
-    _update_view_with_all_currency('#puerto',
-        XE.from_usd_to_eur(weight * multiplicator));
+    var price_puerto = XE.from_usd_to_eur(weight * multiplicator);
+    _update_view_with_all_currency('#puerto', price_puerto);
   };
 
   function compute_despachante_and_update_view(cif_value_eur){
@@ -135,7 +144,7 @@ $(document).ready(function(){
 
     var cif_value_usd = XE.from_eur_to_usd(cif_value_eur);
     // convert back to EUR for display
-    var commission = (function compute_desp_commission(cif_value){
+    var commission = (function(cif_value){
       var result;
       $.each($('#table_despachante tr'), function(){
         if ($(this).data("low") < cif_value && cif_value < $(this).data("up")){
@@ -144,13 +153,26 @@ $(document).ready(function(){
       });
       return result;
     }(cif_value_usd));
-    var com_eur = XE.from_usd_to_eur(commission);
 
+    var com_eur = XE.from_usd_to_eur(commission);
     _update_view_with_all_currency('#despachante', com_eur + gastos_eur);
   };
 
+  function compute_vat_and_update_view(cif_value_eur){
+    var cif_value_usd = XE.from_eur_to_usd(cif_value_eur);
 
-  // helper function
+    var vat = parseFloat($('#table_iva').data('iva')) +
+      parseFloat($('#table_ant_iva').data('ant_iva'));
+    var vat_usd = cif_value_usd * vat;
+
+    var vat_eur = XE.from_usd_to_eur(vat_usd);
+    _update_view_with_all_currency('#vat', vat_eur);
+  };
+
+  /*
+   * helper functions
+   */
+
   function _update_view_with_all_currency(id, eur_value){
     // Because I am retrieving the information with USD Base
     // I have to convert the value to USD before computing the UYU
