@@ -57,20 +57,11 @@ $(document).ready(function(){
         cif_total_eur = _.reduce(_.values(total), function(x, y){
           return x + y;}, 0);
         compute_puerto_and_update_view(cif_total_eur, weight);
-        compute_desp_and_update_view(cif_total_eur);
+        compute_despachante_and_update_view(cif_total_eur);
         return cif_total_eur;
       }
     };
   }());
-
-  function compute_price_transport(price, length, width){
-    var base_price = price * length;
-    var extra = 0;
-    if (width > 2.5){
-        extra = Math.ceil((width - 2.5) / 0.25) * 0.1 * base_price;
-    }
-    return base_price + extra;
-  };
 
   // Start of price simulation
   $('#input_price').change(function(){
@@ -88,7 +79,15 @@ $(document).ready(function(){
     var width = $('#' + $machine_id + ' td[name="width"]').data("width");
 
     var base_price = $('#table_price_mvd').data("base_price");
-    var transport_price = compute_price_transport(base_price, length, width);
+    var transport_price = (function compute_price_transport(price, length, width){
+        var base_price = price * length;
+        var extra = 0;
+        if (width > 2.5){
+            extra = Math.ceil((width - 2.5) / 0.25) * 0.1 * base_price;
+        }
+        return base_price + extra;
+      }(base_price, length, width));
+
     _update_view_with_all_currency('#transport', transport_price);
     CIF.plus('transport', transport_price);
     _update_view_with_all_currency('#cif', CIF.status());
@@ -118,7 +117,7 @@ $(document).ready(function(){
     var multiplicator = (function(ratio){
       var result;
       $.each($('#table_puerto tr'), function(){
-        if ($(this).data("ratio_low") < ratio && ratio < $(this).data("up")){
+        if ($(this).data("ratio_low") < ratio && ratio < $(this).data("ratio_up")){
           result = $(this).data("multiplicator");
         };
       });
@@ -129,25 +128,27 @@ $(document).ready(function(){
         XE.from_usd_to_eur(weight * multiplicator));
   };
 
-  function compute_desp_and_update_view(cif_value_eur){
-    var gastos_usd = $('#despa_gastos').data('despa_gastos')
+  function compute_despachante_and_update_view(cif_value_eur){
     // convert the EUR to USD
+    var gastos_usd = $('#despa_gastos').data('despa_gastos')
+    var gastos_eur = XE.from_usd_to_eur(gastos_usd);
+
     var cif_value_usd = XE.from_eur_to_usd(cif_value_eur);
     // convert back to EUR for display
-    var com_eur = XE.from_usd_to_eur(compute_desp_commission(cif_value_usd));
-    var gastos_eur = XE.from_usd_to_eur(gastos_usd);
+    var commission = (function compute_desp_commission(cif_value){
+      var result;
+      $.each($('#table_despachante tr'), function(){
+        if ($(this).data("low") < cif_value && cif_value < $(this).data("up")){
+          result = cif_value * $(this).data("percentage") / 100;
+        };
+      });
+      return result;
+    }(cif_value_usd));
+    var com_eur = XE.from_usd_to_eur(commission);
+
     _update_view_with_all_currency('#despachante', com_eur + gastos_eur);
   };
 
-  function compute_desp_commission(cif_value){
-    var result;
-    $.each($('#table_despachante tr'), function(){
-      if ($(this).data("low") < cif_value && cif_value < $(this).data("up")){
-        result = cif_value * $(this).data("percentage") / 100;
-      };
-    });
-    return result;
-  };
 
   // helper function
   function _update_view_with_all_currency(id, eur_value){
