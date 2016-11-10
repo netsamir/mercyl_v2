@@ -1,0 +1,25 @@
+{% extends "skl_two_col_input.html" %}
+{% block title %}Buckets{% endblock %}
+{% block data %}
+
+<div class="table-responsive">
+    <table class="table table-hover">
+        <thead>
+            <th>Size</th>
+            <th>Number</th>
+        </thead>
+
+        <tbody>
+        {% for item in bucket %}
+        <tr>
+            <th>{{ item.size }}</th>
+            <th></th>
+        </tr>
+        {% endfor%}
+        </tbody>
+
+    </table>
+</div>
+{% endblock %}
+{% block summary %}<div class="alert alert-info" role="alert">500 USD</DIV>
+{% endblock %}

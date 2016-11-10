@@ -1,0 +1,47 @@
+{% extends "skl_one_col.html" %}
+{% block title %} Balance {% endblock %}
+{% block data %}
+<div class="table-responsive">
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>USD</th>
+            </tr>
+        </thead>
+
+        <tbody>
+        <tr>
+            <th>Cost Price</th>
+            <td>37,223</td>
+        </tr>
+        <tr>
+            <th>Selling Price</th>
+            <td>46,500</td>
+        </tr>
+        <tr>
+            <th>Sold Price</th>
+            <td>46,500</td>
+        </tr>
+        <tr>
+            <th>Fix cost</th>
+            <td>500</td>
+        </tr>
+        <tr>
+            <th>EBIT</th>
+            <td>18,866</td>
+        </tr>
+        {% for item in taxes %}
+        <tr>
+            <th>IRAE</th>
+            <td>{{ item.irae }}</td>
+        </tr>
+        {% endfor%}
+        <tr>
+            <th>Profit</th>
+            <td>12,500</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+{% endblock %}
