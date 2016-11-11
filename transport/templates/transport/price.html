@@ -139,9 +139,9 @@
 <fieldset>
 {% for _ in '012345' %}
  <section>
-   <div class='row' id="{% cycle 'transport' 'puerto' 'vat' 'aduana' 'kma' 'despachante' 'cost_of_sell' 'bank_fee' %}">
+   <div class='row' id="{% cycle 'transport' 'puerto' 'vat' 'tas' 'aduana' 'kma' 'despachante' 'cost_of_sell' 'bank_fee' %}">
     <label class="label col col-3">
-    {% cycle 'Transport' 'Puerto' 'VAT' 'Aduana' 'KMA' 'Despachante' 'Cost of Sell' 'Bank Fee' %}</label>
+    {% cycle 'Transport' 'Puerto' 'VAT' 'TAS' 'Aduana' 'KMA' 'Despachante' 'Cost of Sell' 'Bank Fee' %}</label>
     {% for _ in 'xxx' %}
      <div class="col col-3">
       <label class="input">
@@ -227,7 +227,7 @@
 <tbody id="table_machine" >
 {% for item in machine %}
 <tr id={{ item.id }}>
-<th scope=row> {{ item.kind }}</th>
+<th scope=row>{{ item.kind }}</th>
 <th scope=row>{{ item.brand }} {{item.model}}</td>
   <td name='length' data-length={{ item.length }}>{{ item.length }}</td>
   <td name='width' data-width={{ item.width }}>{{ item.width }}</td>
