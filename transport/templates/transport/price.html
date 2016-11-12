@@ -137,11 +137,11 @@
 </fieldset>
 
 <fieldset>
-{% for _ in '012345' %}
+{% for _ in '0123456789ABC' %}
  <section>
-   <div class='row' id="{% cycle 'transport' 'puerto' 'vat' 'tas' 'aduana' 'kma' 'despachante' 'cost_of_sell' 'bank_fee' %}">
+   <div class='row' id="{% cycle 'transport' 'puerto' 'vat' 'tsa' 'extrao' 'recargo' 'timbre' 'guia' 'empadronamiento' 'kma' 'despachante' 'cost_of_sell' 'bank_fee' %}">
     <label class="label col col-3">
-    {% cycle 'Transport' 'Puerto' 'VAT' 'TAS' 'Aduana' 'KMA' 'Despachante' 'Cost of Sell' 'Bank Fee' %}</label>
+    {% cycle 'Transport' 'Puerto' 'VAT' 'TSA' 'Extraordinario' 'Recargo' 'Timbre Profesional' 'Guia de Transito' 'Cert. Empadronamiento' 'KMA' 'Despachante' 'Cost of Sell' 'Bank Fee' %}</label>
     {% for _ in 'xxx' %}
      <div class="col col-3">
       <label class="input">
@@ -388,15 +388,15 @@
 </tr>
 <tr>
   <th>Guia de transito</th>
-  <td> {{ item.guia_de_transito }} </td>
+  <td id='table_guia' data-value='{{ item.guia_de_transito }}'> {{ item.guia_de_transito }} </td>
 </tr>
 <tr>
   <th>Timbre Profesional</th>
-  <td> {{ item.timbre_profesional }}</td>
+  <td id='table_timbre' data-value='{{ item.timbre_profesional }}'> {{ item.timbre_profesional }}</td>
 </tr>
 <tr>
   <th>Recargo</th>
-  <td> {{ item.recargo }} </td>
+  <td id='table_recargo' data-value="{{ item.recargo }}"> {{ item.recargo }} </td>
 </tr>
 <tr>
   <th>IVA</th>
@@ -408,7 +408,7 @@
 </tr>
 <tr>
   <th>Cert. Empadronamiento</th>
-  <td> {{ item.cert_empadronamiento }} </td>
+  <td id='table_empadronamiento' data-value='{{ item.cert_empadronamiento }}'> {{ item.cert_empadronamiento }} </td>
 </tr>
 {% endfor%}
 </tbody>
@@ -420,18 +420,18 @@
 <tr>
   <th>CIF Low</th>
   <th>CIF Up</th>
-  <th>Percentage</th>
-  <th>Fix</th>
+  <th>Price</th>
   <th>Currency</th>
 </tr>
 </thead>
-<tbody>
-{% for item in tsa %}
-<tr>
+<tbody id="table_extrao">
+{% for item in extraordinario %}
+<tr data-low="{{ item.cif_low }}"
+    data-up="{{ item.cif_up }}"
+    data-value="{{ item.price }}">
   <td> {{ item.cif_low }}</td>
   <td> {{ item.cif_up }}</td>
-  <td> {{ item.percentage }}</td>
-  <td> {{ item.fix }}</td>
+  <td> {{ item.price }}</td>
   <td> {{ item.currency }}</td>
 </tr>
 {% endfor%}
@@ -439,7 +439,7 @@
 </table>
 </div>
 
-{% include "panel_info.html" with title="TAS" %}
+{% include "panel_info.html" with title="TSA" %}
 <thead>
 <tr>
   <th>CIF Low</th>
@@ -449,9 +449,11 @@
   <th>Currency</th>
 </tr>
 </thead>
-<tbody>
+<tbody id="table_tsa">
 {% for item in tsa %}
-<tr>
+<tr data-low="{{ item.cif_low }}"
+    data-up="{{ item.cif_up }}"
+    data-value="{{ item.percentage }}:{{ item.fix }}">
   <td> {{ item.cif_low }}</td>
   <td> {{ item.cif_up }}</td>
   <td> {{ item.percentage }}</td>
@@ -474,9 +476,9 @@
 </thead>
 <tbody id="table_puerto">
 {% for item in puerto %}
-<tr data-ratio_low="{{ item.ratio_low }}"
-    data-ratio_up="{{ item.ratio_up }}"
-    data-multiplicator="{{ item.multiplicator }}">
+<tr data-low="{{ item.ratio_low }}"
+    data-up="{{ item.ratio_up }}"
+    data-value="{{ item.multiplicator }}">
 
     <td> {{ item.ratio_low }}</td>
     <td> {{ item.ratio_up }}</td>
@@ -544,7 +546,7 @@
 {% for item in honorarios %}
 <tr data-low="{{ item.cif_low }}"
     data-up="{{ item.cif_up }}"
-    data-percentage="{{ item.percentage }}">
+    data-value="{{ item.percentage }}">
 
   <td>{{ item.cif_low }}</td>
   <td>{{ item.cif_up }}</td>

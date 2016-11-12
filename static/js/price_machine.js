@@ -50,7 +50,7 @@ $(document).ready(function(){
 
     return {
       plus: function(key, value){
-        total[key] = Math.round(value);
+        total[key] = _r(value);
       },
       update_weight: function(w){
         weight = w;
@@ -125,53 +125,81 @@ $(document).ready(function(){
    */
 
   var CIFFunctions = function(){
+    var g_weight = 1;
+    var g_cif_total_eur = 0;
 
     var Compute_with_CIF_UpdateView = {
       func: function(){},
-    // compute_and_update_view: function(id, cif_value_eur){
-      compute_and_update_view: function(){
-        var cif_value_usd = XE.from_eur_to_usd(arguments[1]);
-        var value_output_usd = this.func(cif_value_usd, arguments);
+      compute_and_update_view: function(id){
+        var cif_value_usd = XE.from_eur_to_usd(g_cif_total_eur);
+        var value_output_usd = this.func(cif_value_usd);
         var value_output_eur = XE.from_usd_to_eur(value_output_usd);
-        _update_view_with_all_currency(arguments[0], value_output_eur);
+        _update_view_with_all_currency(id, value_output_eur);
       },
     };
 
-    var tas = Object.create(Compute_with_CIF_UpdateView);
+    var tsa = Object.create(Compute_with_CIF_UpdateView);
     var vat = Object.create(Compute_with_CIF_UpdateView);
     var despachante = Object.create(Compute_with_CIF_UpdateView);
     var puerto = Object.create(Compute_with_CIF_UpdateView);
     var extrao = Object.create(Compute_with_CIF_UpdateView);
+    var recargo = Object.create(Compute_with_CIF_UpdateView);
 
-    extrao.func = function(cif_value_usd, args){
-      console.log('pass');
+// Guia de transito	6.00
+// Timbre Profesional	6.00
+// Cert. Empadronamiento	15.00
+
+    recargo.func = function(cif_value_usd){
+      console.log('Computing Recargo...');
+      var rate = _p($('#table_recargo').data('value'));
+      console.log('Rate is: ' + rate);
+      var x = cif_value_usd * rate;
+      console.log('CIF (' + _r(cif_value_usd) + ') * Recargo = USD '
+          + _r(x));
+      console.log('Done!');
+      console.log('-------------------------------');
+      return x;
     };
 
-    puerto.func = function(cif_value_usd, args){
-      weight = args[2];
-      console.log('Compute Puerto Tax...');
-      console.log('CIF: USD ' + Math.round(cif_value_usd));
+    vat.func = function(cif_value_usd){
+      console.log('Computing VAT...');
+      var vat = _p($('#table_iva').data('iva')) +
+        _p($('#table_ant_iva').data('ant_iva'));
+      console.log('Rate is: ' + vat);
+      var vat_usd = cif_value_usd * vat;
+      console.log('CIF (' + _r(cif_value_usd) + ') * VAT = USD ' + _r(vat_usd));
+      console.log('Done!');
+      console.log('-------------------------------');
+      return vat_usd;
+    };
+
+    extrao.func = function(cif_value_usd){
+      console.log('Computing Extraordinarios Tax...');
+      console.log('Lookup CIF value ('+ _r(cif_value_usd) +') in table...');
+      var x = _table_lookup('#table_extrao', cif_value_usd);
+      console.log('Done!');
+      console.log('-------------------------------');
+      return x;
+    };
+
+    puerto.func = function(cif_value_usd){
+      var weight = g_weight;
+      console.log('Computing Puerto Tax...');
+      console.log('CIF: USD ' + _r(cif_value_usd));
       console.log('Weight: Ton ' + weight);
       var ratio = cif_value_usd / weight;
-      console.log('Ratio : CIF / Weight = ' + Math.round(ratio));
+      console.log('Ratio : CIF / Weight = ' + _r(ratio));
       var multiplicator = (function(ratio){
-        console.log('Lookup ratio ('+ Math.round(ratio) +') in Puerto table for multiplicator...');
-        var result;
-        $.each($('#table_puerto tr'), function(){
-          if ($(this).data("ratio_low") < ratio && ratio < $(this).data("ratio_up")){
-            result = $(this).data("multiplicator");
-            console.log('The multiplicator to apply is : ' + result);
-          };
-        });
-        return result;
+        console.log('Lookup ratio ('+ _r(ratio) +') in Puerto table for multiplicator...');
+        return _table_lookup('#table_puerto', ratio);
       }(ratio)); //lookup in table based on the ratio
 
       // TODO : Add the Lei de estiba in model
       var ley = cif_value_usd * 0.25 / 100;
       var x = weight * multiplicator;
-      console.log('Ley de estiba : ' + Math.round(cif_value_usd) + ' * 0.25 / 100 = USD ' + Math.round(ley));
-      console.log('Puerto tax : ' + weight + ' * ' + multiplicator + ' = USD ' + Math.round(x));
-      console.log('Total Puerto tax and ley de estiba = USD ' + Math.round((x + ley)));
+      console.log('Ley de estiba : ' + _r(cif_value_usd) + ' * 0.25 / 100 = USD ' + _r(ley));
+      console.log('Puerto tax : ' + weight + ' * ' + multiplicator + ' = USD ' + _r(x));
+      console.log('Total Puerto tax and ley de estiba = USD ' + _r((x + ley)));
       console.log('Done!');
       console.log('-------------------------------');
       return x + ley;
@@ -179,45 +207,67 @@ $(document).ready(function(){
 
     despachante.func = function(cif_value_usd){
       // Fix price in USD
+      console.log('Computing Despachante fee...');
+      console.log('CIF: USD ' + _r(cif_value_usd));
       var gastos = $('#despa_gastos').data('despa_gastos')
+      console.log('Lookup CIF value ('+ _r(cif_value_usd) +') in table...');
       var commission = (function(cif_value){
-        var result;
-        $.each($('#table_despachante tr'), function(){
-          if ($(this).data("low") < cif_value && cif_value < $(this).data("up")){
-            result = cif_value * $(this).data("percentage") / 100;
-          };
-        });
-        return result;
+        return cif_value * _table_lookup('#table_despachante', cif_value) / 100;
       }(cif_value_usd));
-
-      return commission + gastos
+      var total = _r(commission) + _r(gastos);
+      console.log('Total: commission ('+ _r(commission)
+            +') + gastos ('+ gastos +') = USD ' + _r(total));
+      console.log('Done!');
+      console.log('-------------------------------');
+      return total;
     };
 
-    vat.func = function(cif_value_usd){
-      var vat = parseFloat($('#table_iva').data('iva')) +
-        parseFloat($('#table_ant_iva').data('ant_iva'));
-      return vat_usd = cif_value_usd * vat;
+    tsa.func = function(cif_value_usd){
+      console.log('Computing TSA tax...');
+      console.log('Lookup CIF value ('+ _r(cif_value_usd) +') in table...');
+      var x = _table_lookup('#table_tsa', cif_value_usd).split(':');
+      var result;
+      console.log('Checking if rate or fix should be applied...');
+      if (x[0] != 0){
+        result = cif_value_usd * x[0] / 100;
+        console.log('Total [rate]: ('+ _r(cif_value_usd)
+            +') * rate ('+ x[0] +') = USD ' + _r(result));
+      } else {
+        result = _r(x[1]);
+        console.log('Total [fix]: USD ' + _r(result));
+      }
+      console.log('Done!');
+      console.log('-------------------------------');
+      return result;
     };
 
-    tas.func = function(cif_value_usd){
-      return cif_value_usd;
+    function _table_lookup(id, value){
+      var result;
+      $.each($(id + ' tr'), function(){
+        if ($(this).data("low") < value && value < $(this).data("up")){
+          result = $(this).data("value");
+          console.log('Value found : ' + result);
+        };
+      });
+      return result;
     };
 
     return {
-      compute_and_update_view : function(){
-        cif_total_eur = arguments[0];
-        weight = typeof arguments[1] === 'number' ? arguments[1] : 1;
-        puerto.compute_and_update_view('#puerto', cif_total_eur, weight);
-        despachante.compute_and_update_view('#despachante', cif_total_eur);
-        vat.compute_and_update_view('#vat', cif_total_eur);
-        tas.compute_and_update_view('#tas', cif_total_eur);
+      compute_and_update_view : function(cif_total_eur, weight){
+        g_cif_total_eur = cif_total_eur;
+        g_weight = weight;
+        puerto.compute_and_update_view('#puerto');
+        despachante.compute_and_update_view('#despachante');
+        vat.compute_and_update_view('#vat');
+        tsa.compute_and_update_view('#tsa');
+        extrao.compute_and_update_view('#extrao');
+        recargo.compute_and_update_view('#recargo');
       }
     };
   };
   /*
    * helper functions
    */
-
   function _update_view_with_all_currency(id, eur_value){
     // Because I am retrieving the information with USD Base
     // I have to convert the value to USD before computing the UYU
@@ -229,8 +279,17 @@ $(document).ready(function(){
     usd_value = XE.from_eur_to_usd(eur_value);
     uyu_value = XE.from_eur_to_uyu(eur_value);
 
-    $(id + ' :input[name="eur"]').val(Math.round(eur_value));
-    $(id + ' :input[name="usd"]').val(Math.round(usd_value));
-    $(id + ' :input[name="uyu"]').val(Math.round(uyu_value));
+    $(id + ' :input[name="eur"]').val(_r(eur_value));
+    $(id + ' :input[name="usd"]').val(_r(usd_value));
+    $(id + ' :input[name="uyu"]').val(_r(uyu_value));
   };
+
+  function _p(x){
+    return parseFloat(x)
+  };
+
+  function _r(x) {
+    return Math.round(x)
+  };
+
 });// end of document ready
