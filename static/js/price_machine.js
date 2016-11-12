@@ -144,10 +144,36 @@ $(document).ready(function(){
     var puerto = Object.create(Compute_with_CIF_UpdateView);
     var extrao = Object.create(Compute_with_CIF_UpdateView);
     var recargo = Object.create(Compute_with_CIF_UpdateView);
+    var guia = Object.create(Compute_with_CIF_UpdateView);
+    var timbre = Object.create(Compute_with_CIF_UpdateView);
+    var empadronamiento = Object.create(Compute_with_CIF_UpdateView);
 
-// Guia de transito	6.00
-// Timbre Profesional	6.00
-// Cert. Empadronamiento	15.00
+    empadronamiento.func = function(cif_value_usd){
+      console.log('Computing Cert. de Empadronamiento...');
+      var x = _p($('#table_empadronamiento').data('value'));
+      console.log('The fix is: ' + x);
+      console.log('Done!');
+      console.log('-------------------------------');
+      return x;
+    };
+
+    timbre.func = function(cif_value_usd){
+      console.log('Computing Timbre Professional...');
+      var x = _p($('#table_timbre').data('value'));
+      console.log('The fix is: ' + x);
+      console.log('Done!');
+      console.log('-------------------------------');
+      return x;
+    };
+
+    guia.func = function(cif_value_usd){
+      console.log('Computing Guia de transito...');
+      var x = _p($('#table_guia').data('value'));
+      console.log('The fix is: ' + x);
+      console.log('Done!');
+      console.log('-------------------------------');
+      return x;
+    };
 
     recargo.func = function(cif_value_usd){
       console.log('Computing Recargo...');
@@ -253,7 +279,7 @@ $(document).ready(function(){
     };
 
     return {
-      compute_and_update_view : function(cif_total_eur, weight){
+     compute_and_update_view : function(cif_total_eur, weight){
         g_cif_total_eur = cif_total_eur;
         g_weight = weight;
         puerto.compute_and_update_view('#puerto');
@@ -262,6 +288,9 @@ $(document).ready(function(){
         tsa.compute_and_update_view('#tsa');
         extrao.compute_and_update_view('#extrao');
         recargo.compute_and_update_view('#recargo');
+        guia.compute_and_update_view('#guia');
+        timbre.compute_and_update_view('#timbre');
+        empadronamiento.compute_and_update_view('#empadronamiento');
       }
     };
   };
