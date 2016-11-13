@@ -55,6 +55,11 @@ $(document).ready(function(){
       update_weight: function(w){
         weight = w;
       },
+      total: function(){
+        cif_total_eur = _.reduce(_.values(total), function(x, y){
+          return x + y;}, 0);
+        return cif_total_eur;
+      },
       status: function(){
         // And update the differente value depending on CIF, ie Despachante.
         cif_total_eur = _.reduce(_.values(total), function(x, y){
@@ -63,8 +68,24 @@ $(document).ready(function(){
         return cif_total_eur;
       }
     };
-
   }());
+
+  // Compute the commission:
+  // Input :
+  //   - percentage: #commission-value
+  //   - CIF value: CIF.status()
+  // Description:
+  //  Update #commission = percentage * CIF Value
+  $('#commission_slider').slider({
+    min: 0,
+    value: 15,
+    max: 100,
+    slide: function(event, ui) {
+      $('#commission_value').text(ui.value);
+      var rate = $('#commission_value').text()/100;
+      _update_view_with_all_currency('#commission', CIF.total() * rate);
+    }
+  });
 
   /*
    * Collect information from the user to create CIF
