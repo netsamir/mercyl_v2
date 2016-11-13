@@ -128,7 +128,7 @@ $(document).ready(function(){
     var g_weight = 1;
     var g_cif_total_eur = 0;
 
-    var Compute_with_CIF_UpdateView = {
+    var EurUsdCurrencyIntegrity = {
       func: function(){},
       compute_and_update_view: function(id){
         var cif_value_usd = XE.from_eur_to_usd(g_cif_total_eur);
@@ -138,134 +138,154 @@ $(document).ready(function(){
       },
     };
 
-    var tsa = Object.create(Compute_with_CIF_UpdateView);
-    var vat = Object.create(Compute_with_CIF_UpdateView);
-    var despachante = Object.create(Compute_with_CIF_UpdateView);
-    var puerto = Object.create(Compute_with_CIF_UpdateView);
-    var extrao = Object.create(Compute_with_CIF_UpdateView);
-    var recargo = Object.create(Compute_with_CIF_UpdateView);
-    var guia = Object.create(Compute_with_CIF_UpdateView);
-    var timbre = Object.create(Compute_with_CIF_UpdateView);
-    var empadronamiento = Object.create(Compute_with_CIF_UpdateView);
-
-    empadronamiento.func = function(cif_value_usd){
-      console.log('Computing Cert. de Empadronamiento...');
-      var x = _p($('#table_empadronamiento').data('value'));
-      console.log('The fix is: ' + x);
-      console.log('Done!');
-      console.log('-------------------------------');
-      return x;
+    function _obj_maker(f){
+      return (function(){
+        var o = Object.create(EurUsdCurrencyIntegrity);
+        o.func = f
+        return o;
+        }())
     };
 
-    timbre.func = function(cif_value_usd){
-      console.log('Computing Timbre Professional...');
-      var x = _p($('#table_timbre').data('value'));
-      console.log('The fix is: ' + x);
-      console.log('Done!');
-      console.log('-------------------------------');
-      return x;
-    };
+    var cif_dependent =
+    [
+      {
+        'id': '#empadronamiento',
+        'obj': _obj_maker(function(cif_value_usd){
+          console.log('Computing Cert. de Empadronamiento...');
+          var x = _p($('#table_empadronamiento').data('value'));
+          console.log('The fix is: ' + x);
+          console.log('Done!');
+          console.log('-------------------------------');
+          return x;
+        })
+      },
+      {
+        'id': '#timbre',
+        'obj': _obj_maker(function(cif_value_usd){
+          console.log('Computing Timbre Professional...');
+          var x = _p($('#table_timbre').data('value'));
+          console.log('The fix is: ' + x);
+          console.log('Done!');
+          console.log('-------------------------------');
+          return x;
+        })
+      },
+      {
+        'id': '#guia',
+        'obj': _obj_maker(function(cif_value_usd){
+          console.log('Computing Guia de transito...');
+          var x = _p($('#table_guia').data('value'));
+          console.log('The fix is: ' + x);
+          console.log('Done!');
+          console.log('-------------------------------');
+          return x;
+        })
+      },
+      {
+        'id': '#recargo',
+        'obj': _obj_maker(function(cif_value_usd){
+          console.log('Computing Recargo...');
+          var rate = _p($('#table_recargo').data('value'));
+          console.log('Rate is: ' + rate);
+          var x = cif_value_usd * rate;
+          console.log('CIF (' + _r(cif_value_usd) + ') * Recargo = USD '
+              + _r(x));
+          console.log('Done!');
+          console.log('-------------------------------');
+          return x;
+        })
+      },
+      {
+        'id': '#vat',
+        'obj': _obj_maker(function(cif_value_usd){
+          console.log('Computing VAT...');
+          var vat = _p($('#table_iva').data('iva')) +
+            _p($('#table_ant_iva').data('ant_iva'));
+          console.log('Rate is: ' + vat);
+          var vat_usd = cif_value_usd * vat;
+          console.log('CIF (' + _r(cif_value_usd) + ') * VAT = USD ' + _r(vat_usd));
+          console.log('Done!');
+          console.log('-------------------------------');
+          return vat_usd;
+        })
+      },
+      {
+        'id': '#extrao',
+        'obj': _obj_maker(function(cif_value_usd){
+          console.log('Computing Extraordinarios Tax...');
+          console.log('Lookup CIF value ('+ _r(cif_value_usd) +') in table...');
+          var x = _table_lookup('#table_extrao', cif_value_usd);
+          console.log('Done!');
+          console.log('-------------------------------');
+          return x;
+        })
+      },
+      {
+        'id': '#puerto',
+        'obj': _obj_maker(function(cif_value_usd){
+          var weight = g_weight;
+          console.log('Computing Puerto Tax...');
+          console.log('CIF: USD ' + _r(cif_value_usd));
+          console.log('Weight: Ton ' + weight);
+          var ratio = cif_value_usd / weight;
+          console.log('Ratio : CIF / Weight = ' + _r(ratio));
+          var multiplicator = (function(ratio){
+            console.log('Lookup ratio ('+ _r(ratio) +') in Puerto table for multiplicator...');
+            return _table_lookup('#table_puerto', ratio);
+          }(ratio)); //lookup in table based on the ratio
 
-    guia.func = function(cif_value_usd){
-      console.log('Computing Guia de transito...');
-      var x = _p($('#table_guia').data('value'));
-      console.log('The fix is: ' + x);
-      console.log('Done!');
-      console.log('-------------------------------');
-      return x;
-    };
-
-    recargo.func = function(cif_value_usd){
-      console.log('Computing Recargo...');
-      var rate = _p($('#table_recargo').data('value'));
-      console.log('Rate is: ' + rate);
-      var x = cif_value_usd * rate;
-      console.log('CIF (' + _r(cif_value_usd) + ') * Recargo = USD '
-          + _r(x));
-      console.log('Done!');
-      console.log('-------------------------------');
-      return x;
-    };
-
-    vat.func = function(cif_value_usd){
-      console.log('Computing VAT...');
-      var vat = _p($('#table_iva').data('iva')) +
-        _p($('#table_ant_iva').data('ant_iva'));
-      console.log('Rate is: ' + vat);
-      var vat_usd = cif_value_usd * vat;
-      console.log('CIF (' + _r(cif_value_usd) + ') * VAT = USD ' + _r(vat_usd));
-      console.log('Done!');
-      console.log('-------------------------------');
-      return vat_usd;
-    };
-
-    extrao.func = function(cif_value_usd){
-      console.log('Computing Extraordinarios Tax...');
-      console.log('Lookup CIF value ('+ _r(cif_value_usd) +') in table...');
-      var x = _table_lookup('#table_extrao', cif_value_usd);
-      console.log('Done!');
-      console.log('-------------------------------');
-      return x;
-    };
-
-    puerto.func = function(cif_value_usd){
-      var weight = g_weight;
-      console.log('Computing Puerto Tax...');
-      console.log('CIF: USD ' + _r(cif_value_usd));
-      console.log('Weight: Ton ' + weight);
-      var ratio = cif_value_usd / weight;
-      console.log('Ratio : CIF / Weight = ' + _r(ratio));
-      var multiplicator = (function(ratio){
-        console.log('Lookup ratio ('+ _r(ratio) +') in Puerto table for multiplicator...');
-        return _table_lookup('#table_puerto', ratio);
-      }(ratio)); //lookup in table based on the ratio
-
-      // TODO : Add the Lei de estiba in model
-      var ley = cif_value_usd * 0.25 / 100;
-      var x = weight * multiplicator;
-      console.log('Ley de estiba : ' + _r(cif_value_usd) + ' * 0.25 / 100 = USD ' + _r(ley));
-      console.log('Puerto tax : ' + weight + ' * ' + multiplicator + ' = USD ' + _r(x));
-      console.log('Total Puerto tax and ley de estiba = USD ' + _r((x + ley)));
-      console.log('Done!');
-      console.log('-------------------------------');
-      return x + ley;
-    };
-
-    despachante.func = function(cif_value_usd){
-      // Fix price in USD
-      console.log('Computing Despachante fee...');
-      console.log('CIF: USD ' + _r(cif_value_usd));
-      var gastos = $('#despa_gastos').data('despa_gastos')
-      console.log('Lookup CIF value ('+ _r(cif_value_usd) +') in table...');
-      var commission = (function(cif_value){
-        return cif_value * _table_lookup('#table_despachante', cif_value) / 100;
-      }(cif_value_usd));
-      var total = _r(commission) + _r(gastos);
-      console.log('Total: commission ('+ _r(commission)
-            +') + gastos ('+ gastos +') = USD ' + _r(total));
-      console.log('Done!');
-      console.log('-------------------------------');
-      return total;
-    };
-
-    tsa.func = function(cif_value_usd){
-      console.log('Computing TSA tax...');
-      console.log('Lookup CIF value ('+ _r(cif_value_usd) +') in table...');
-      var x = _table_lookup('#table_tsa', cif_value_usd).split(':');
-      var result;
-      console.log('Checking if rate or fix should be applied...');
-      if (x[0] != 0){
-        result = cif_value_usd * x[0] / 100;
-        console.log('Total [rate]: ('+ _r(cif_value_usd)
-            +') * rate ('+ x[0] +') = USD ' + _r(result));
-      } else {
-        result = _r(x[1]);
-        console.log('Total [fix]: USD ' + _r(result));
+          // TODO : Add the Lei de estiba in model
+          var ley = cif_value_usd * 0.25 / 100;
+          var x = weight * multiplicator;
+          console.log('Ley de estiba : ' + _r(cif_value_usd) + ' * 0.25 / 100 = USD ' + _r(ley));
+          console.log('Puerto tax : ' + weight + ' * ' + multiplicator + ' = USD ' + _r(x));
+          console.log('Total Puerto tax and ley de estiba = USD ' + _r((x + ley)));
+          console.log('Done!');
+          console.log('-------------------------------');
+          return x + ley;
+        })
+      },
+      {
+        'id': '#despachante',
+        'obj': _obj_maker(function(cif_value_usd){
+          // Fix price in USD
+          console.log('Computing Despachante fee...');
+          console.log('CIF: USD ' + _r(cif_value_usd));
+          var gastos = $('#despa_gastos').data('despa_gastos')
+          console.log('Lookup CIF value ('+ _r(cif_value_usd) +') in table...');
+          var commission = (function(cif_value){
+            return cif_value * _table_lookup('#table_despachante', cif_value) / 100;
+          }(cif_value_usd));
+          var total = _r(commission) + _r(gastos);
+          console.log('Total: commission ('+ _r(commission)
+                +') + gastos ('+ gastos +') = USD ' + _r(total));
+          console.log('Done!');
+          console.log('-------------------------------');
+          return total;
+        })
+      },
+      {
+        'id': '#tsa',
+        'obj': _obj_maker(function(cif_value_usd){
+          console.log('Computing TSA tax...');
+          console.log('Lookup CIF value ('+ _r(cif_value_usd) +') in table...');
+          var x = _table_lookup('#table_tsa', cif_value_usd).split(':');
+          var result;
+          console.log('Checking if rate or fix should be applied...');
+          if (x[0] != 0){
+            result = cif_value_usd * x[0] / 100;
+            console.log('Total [rate]: ('+ _r(cif_value_usd)
+                +') * rate ('+ x[0] +') = USD ' + _r(result));
+          } else {
+            result = _r(x[1]);
+            console.log('Total [fix]: USD ' + _r(result));
+          }
+          console.log('Done!');
+          console.log('-------------------------------');
+          return result;
+        })
       }
-      console.log('Done!');
-      console.log('-------------------------------');
-      return result;
-    };
+    ];
 
     function _table_lookup(id, value){
       var result;
@@ -279,18 +299,14 @@ $(document).ready(function(){
     };
 
     return {
-     compute_and_update_view : function(cif_total_eur, weight){
+      compute_and_update_view: function(cif_total_eur, weight){
         g_cif_total_eur = cif_total_eur;
         g_weight = weight;
-        puerto.compute_and_update_view('#puerto');
-        despachante.compute_and_update_view('#despachante');
-        vat.compute_and_update_view('#vat');
-        tsa.compute_and_update_view('#tsa');
-        extrao.compute_and_update_view('#extrao');
-        recargo.compute_and_update_view('#recargo');
-        guia.compute_and_update_view('#guia');
-        timbre.compute_and_update_view('#timbre');
-        empadronamiento.compute_and_update_view('#empadronamiento');
+        var l = cif_dependent.length;
+        for(var i = 0; i < l; i++){
+          var id = cif_dependent[i]['id'];
+          cif_dependent[i].obj.compute_and_update_view(id);
+        }
       }
     };
   };
