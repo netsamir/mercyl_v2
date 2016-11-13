@@ -76,6 +76,7 @@ $(document).ready(function(){
   //   - CIF value: CIF.status()
   // Description:
   //  Update #commission = percentage * CIF Value
+  //
   $('#commission_slider').slider({
     min: 0,
     value: 15,
@@ -169,6 +170,13 @@ $(document).ready(function(){
 
     var cif_dependent =
     [
+      {
+        'id': '#commission',
+        'obj': _obj_maker(function(cif_value_usd){
+          var rate = $('#commission_value').text()/100;
+          return rate * cif_value_usd;
+        })
+      },
       {
         'id': '#empadronamiento',
         'obj': _obj_maker(function(cif_value_usd){
