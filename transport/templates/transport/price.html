@@ -23,7 +23,6 @@
     -->
 <!-- Reg-Form -->
 <form action="#" id="sky-form4" class="sky-form">
-<header>Machine price simulator</header>
 <fieldset>
   <div class='row'>
 
@@ -75,24 +74,71 @@
       <i></i>
     </label>
     </section>
-
   </div> <!-- End Div row -->
 </fieldset>
 
+<header>Cost of Purchase</header>
 <fieldset>
   <div class='row'>
-    <section class='col col-3'>
-      <label class="checkbox"><input type="checkbox" id="select_inspection"><i></i>Inspection</label>
-<div class="note" id='note-inspection'></div>
-    </section>
-    <section class='col col-3'>
-      <label class="checkbox"><input type="checkbox" id="select_plane"><i></i>Plane</label>
-    </section>
-    <section class='col col-3'>
-      <label class="checkbox"><input type="checkbox" id="select_train"><i></i>Train</label>
-    </section>
 
-    <section class='col col-3'>
+  <div class='col col-4'>
+    {% for _ in '012' %}
+      <label class="checkbox">
+        <input type="checkbox" id="select_{% cycle 'inspection' 'plane' 'train' %}_purchase">
+        <i></i>{% cycle 'Inspection' 'Plane' 'Train' %}
+      </label>
+      <div class="note" id="note-{% cycle 'inspection' 'plane' 'train' %}_purchase"></div>
+      {% endfor %}
+  </div>
+
+  <div class='col col-4'>
+    {% for _ in '012' %}
+      <label class="checkbox">
+        <input type="checkbox" id="select_{% cycle 'car' 'phone' 'dhl' %}_purchase">
+        <i></i>{% cycle 'Car' 'Phone' 'DHL' %}
+      </label>
+      <div class="note" id="note-{% cycle  'car' 'phone' 'dhl' %}_purchase"></div>
+      {% endfor %}
+  </div>
+
+  <div class='col col-4'>
+    {% for _ in '0' %}
+      <label class="checkbox">
+        <input type="checkbox" id="select_{% cycle 'various' 'v' %}_purchase">
+        <i></i>{% cycle 'Various' 'V' %}
+      </label>
+      <div class="note" id="note-{% cycle 'various' 'v' %}_purchase"></div>
+      {% endfor %}
+  </div>
+
+  </div>
+</fieldset>
+
+<header>Cost of Sale</header>
+<fieldset>
+  <div class='row'>
+
+    <div class='col col-4'>
+    {% for _ in '012' %}
+      <label class="checkbox">
+        <input type="checkbox" id="select_{% cycle 'car' 'nafta_maquina' 'bateria' %}_sale">
+        <i></i>{% cycle 'Car' 'Nafta Maquina' 'Bateria' %}
+      </label>
+      <div class="note" id="note-{% cycle 'car' 'nafta_maquina' 'bateria' %}_sale"></div>
+      {% endfor %}
+  </div>
+
+  <div class='col col-4'>
+    {% for _ in '012' %}
+      <label class="checkbox">
+        <input type="checkbox" id="select_{% cycle 'phone' 'mercado_libre' 'various' %}_sale">
+        <i></i>{% cycle 'Phone' 'Mercado Libre' 'Various' %}
+      </label>
+      <div class="note" id="note-{% cycle 'phone' 'mercado_libre' 'various' %}_sale"></div>
+      {% endfor %}
+  </div>
+
+    <section class='col col-4'>
      <label class="input">
       <div class="input-group">
           <span class="input-group-addon">EUR</span>
@@ -101,6 +147,7 @@
         </div>
       </label>
     </section>
+
   </div>
 </fieldset>
 
@@ -118,6 +165,7 @@
 -->
 
 <!--<header>Output</header>-->
+
 <fieldset>
  <section>
    <div class='row'>
@@ -135,13 +183,12 @@
   </div>
  </section>
 </fieldset>
-
 <fieldset>
-{% for _ in '0123456789ABC' %}
+{% for _ in '0123456789ABCDEFG' %}
  <section>
-   <div class='row' id="{% cycle 'transport' 'puerto' 'vat' 'tsa' 'extrao' 'recargo' 'timbre' 'guia' 'empadronamiento' 'kma' 'despachante' 'cost_of_sell' 'bank_fee' %}">
+   <div class='row' id="{% cycle 'cost_of_purchase' 'cost_of_sale' 'transport' 'transport_anvers' 'timbre' 'guia' 'empadronamiento' 'kma' 'bank_fee' 'puerto' 'vat' 'tsa' 'extrao' 'recargo' 'despachante' 'flete' 'commission' %}">
     <label class="label col col-3">
-    {% cycle 'Transport' 'Puerto' 'VAT' 'TSA' 'Extraordinario' 'Recargo' 'Timbre Profesional' 'Guia de Transito' 'Cert. Empadronamiento' 'KMA' 'Despachante' 'Cost of Sell' 'Bank Fee' %}</label>
+    {% cycle 'Cost of Purchase' 'Cost of Sale' 'Transport Montevideo' 'Transport Anvers' 'Timbre Profesional' 'Guia de Transito' 'Cert. Empadronamiento' 'KMA' 'Bank Fee' 'Puerto' 'VAT' 'TSA' 'Extraordinario' 'Recargo' 'Despachante' 'Flete Minas' 'Commission Mercyl' %}</label>
     {% for _ in 'xxx' %}
      <div class="col col-3">
       <label class="input">
@@ -163,11 +210,14 @@
 </fieldset>
 
 <fieldset>
-{% for _ in '01234' %}
+</fieldset>
+<header>Summary</header>
+<fieldset>
+{% for _ in '0123' %}
  <section>
-   <div class="row" id="{% cycle 'purchase_price' 'cif' 'total_cost' 'commission' 'selling_price_with_vat' %}">
+   <div class="row" id="{% cycle 'purchase_price' 'cif' 'total_cost' 'selling_price_with_vat' %}">
     <label class="label col col-3">
-      {% cycle 'Purchase Price' 'CIF' 'Total Cost' 'Commission' 'Selling Price with VAT' %}
+      {% cycle 'Purchase Price' 'CIF' 'Total Cost' 'Selling Price with VAT' %}
     </label>
     {% for _ in 'xxx' %}
      <div class="col col-3">
@@ -200,11 +250,11 @@
 <ul class="nav nav-tabs">
   <li class="active"><a href="#pane_machines" data-toggle="tab">Machines</a></li>
   <li><a href="#pane_cost_of_purchase" data-toggle="tab">Cost of Purchase</a></li>
+  <li><a href="#pane_cost_of_sell" data-toggle="tab">Cost of Sale</a></li>
   <li><a href="#pane_transport" data-toggle="tab">Transport</a></li>
   <li><a href="#pane_aduana" data-toggle="tab">Aduana</a></li>
   <li><a href="#pane_kma" data-toggle="tab">KMA</a></li>
   <li><a href="#pane_despachante" data-toggle="tab">Despachante</a></li>
-  <li><a href="#pane_cost_of_sell" data-toggle="tab">Cost of Sell</a></li>
   <li><a href="#pane_bank_fee" data-toggle="tab">Bank Fees</a></li>
 </ul>
 
@@ -348,6 +398,31 @@
 </table>
 </div>
 
+{% include "panel_info.html" with title="Transport to Minas" %}
+<thead>
+<tr>
+  <th>Name</th>
+  <th>Price</th>
+  <th>Currency</th>
+</tr>
+</thead>
+<tbody>
+{% for item in flete %}
+<tr>
+  <td> {{ item.name }} </td>
+  <td> {{ item.price }}</td>
+  <td> {{ item.currency }}</td>
+</tr>
+{% endfor%}
+</tbody>
+</table>
+</div>
+
+</p>
+</div> <!-- End pane -->
+
+<div class="tab-pane fade in" id="pane_aduana">
+<p>
 {% include "panel_info.html" with title="Tax to leave the Country" %}
 <thead>
 <tr>
@@ -367,11 +442,6 @@
 </tbody>
 </table>
 </div>
-</p>
-</div> <!-- End pane -->
-
-<div class="tab-pane fade in" id="pane_aduana">
-<p>
 <!-- The machine are in Uruguay -->
 {% include "panel_info.html" with title="Aduana" %}
 <thead>
@@ -505,7 +575,7 @@
 {% for item in kma %}
 <tr>
   <td> {{ item.name }} </td>
-  <td> {{ item.price }}</td>
+  <td id="table_kma" data-value="item.price"> {{ item.price }}</td>
 </tr>
 {% endfor%}
 </tbody>
@@ -561,27 +631,8 @@
 
 <div class="tab-pane fade in" id="pane_cost_of_sell">
 <p>
-{% include "panel_info.html" with title="Transport to Minas" %}
-<thead>
-<tr>
-  <th>Name</th>
-  <th>Price</th>
-  <th>Currency</th>
-</tr>
-</thead>
-<tbody>
-{% for item in kma %}
-<tr>
-  <td> {{ item.name }} </td>
-  <td> {{ item.price }}</td>
-  <td> {{ item.currency }}</td>
-</tr>
-{% endfor%}
-</tbody>
-</table>
-</div>
 
-{% include "panel_info.html" with title="Cost of sell" %}
+{% include "panel_info.html" with title="Cost of sale" %}
 <thead> </thead>
 <tbody>
 {% for item in cost_sell %}
@@ -596,6 +647,10 @@
 <tr>
   <th>Phone</th>
   <td>{{ item.phone }}</td>
+</tr>
+<tr>
+  <th>Bateria</th>
+  <td>{{ item.bateria }}</td>
 </tr>
 <tr>
   <th>Mercado Libre</th>

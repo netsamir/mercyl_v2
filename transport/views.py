@@ -13,6 +13,8 @@ class TransportView(TemplateView):
     def get(self, request):
         title = "Machine price (Simulation)"
         machines = Machine.objects.all()
+        cost_sells = Cost_Sell.objects.all()
+        cost_purchases = Cost_Purchase.objects.all()
         transports = Transport.objects.all()
         taxcountrys = TaxCountry.objects.all()
         aduanas = Aduana.objects.all()
@@ -29,8 +31,6 @@ class TransportView(TemplateView):
         taxess = Taxes.objects.all()
         investments = Investment.objects.all()
         buckets = Bucket.objects.all()
-        cost_sells = Cost_Sell.objects.all()
-        cost_purchases = Cost_Purchase.objects.all()
         bank_costs = Bank_Cost.objects.all()
 
         context = {

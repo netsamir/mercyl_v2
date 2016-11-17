@@ -142,10 +142,17 @@ $(document).ready(function(){
     }
   });
 
+
+  /*
+   * The following functions are called per transport
+   */
+  var FixCostFunctions = function(){
+
+  };
+
   /*
    * The following functions are called at every CIF update
    */
-
   var CIFFunctions = function(){
     var g_weight = 1;
     var g_cif_total_eur = 0;
@@ -170,6 +177,12 @@ $(document).ready(function(){
 
     var cif_dependent =
     [
+      {
+        'id': '#cost_of_sale',
+        'obj': _obj_maker(function(cif_value_usd){
+          return -550042;
+        })
+      },
       {
         'id': '#commission',
         'obj': _obj_maker(function(cif_value_usd){

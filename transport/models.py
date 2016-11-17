@@ -302,6 +302,7 @@ class Cost_Sell(models.Model):
     name = models.CharField(max_length=120, default='Mercyl')
     car = models.DecimalField(max_digits=10, decimal_places=2, default=150)
     nafta_maquina = models.DecimalField(max_digits=10, decimal_places=2, default=80)
+    bateria = models.DecimalField(max_digits=10, decimal_places=2, default=150)
     phone = models.DecimalField(max_digits=10, decimal_places=2, default=30)
     mercado_libre = models.DecimalField(max_digits=10, decimal_places=2, default=50)
     work = models.DecimalField(max_digits=10, decimal_places=2, default=200)
