@@ -9,12 +9,20 @@ class TransportView(TemplateView):
     """The view for the TransportView"""
 
     template_name = 'transport/price.html'
-    
+
+    def _make_tuple(self, lst, n):
+        for i in range(0, len(lst), n):
+            val = lst[i:i+n]
+            if len(val) == n:
+                yield tuple(val)
+
     def get(self, request):
         title = "Machine price (Simulation)"
         machines = Machine.objects.all()
-        cost_sells = Cost_Sell.objects.all()
-        cost_purchases = Cost_Purchase.objects.all()
+        cost_of_purchase = Cost_of_Purchase.objects.all()
+        cost_of_sale = Cost_of_Sale.objects.all()
+        cost_of_sale_tuple = list(self._make_tuple(Cost_of_Sale.objects.all(), 3))
+        cost_of_purchase_tuple = list(self._make_tuple(Cost_of_Purchase.objects.all(), 3))
         transports = Transport.objects.all()
         taxcountrys = TaxCountry.objects.all()
         aduanas = Aduana.objects.all()
@@ -36,6 +44,10 @@ class TransportView(TemplateView):
         context = {
             'title' : title,
             'machine' : machines,
+            'cost_of_sale' : cost_of_sale,
+            'cost_of_purchase' : cost_of_purchase,
+            'cost_of_sale_tuple' : cost_of_sale_tuple,
+            'cost_of_purchase_tuple' : cost_of_purchase_tuple,
             'transport' : transports,
             'taxcountry' : taxcountrys,
             'aduana' : aduanas,
@@ -52,8 +64,6 @@ class TransportView(TemplateView):
             'taxes' : taxess,
             'investment' : investments,
             'bucket' : buckets,
-            'cost_sell' : cost_sells,
-            'cost_purchase' : cost_purchases,
             'bank_cost' : bank_costs,
         }
 

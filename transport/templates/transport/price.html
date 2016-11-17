@@ -26,7 +26,7 @@
 <fieldset>
   <div class='row'>
 
-    <section class='col col-3'>
+    <section class='col col-6'>
      <label class="input">
       <div class="input-group">
           <span class="input-group-addon">EUR</span>
@@ -36,7 +36,7 @@
       </label>
     </section>
 
-    <section class='col col-3'>
+    <section class='col col-6'>
     <label class="select">
       <select name="gender" id='select_machine'>
       <option value="0" selected disabled>Machine Model</option>
@@ -47,8 +47,11 @@
       <i></i>
     </label>
     </section>
-
-    <section class='col col-3'>
+  </div>
+</fieldset>
+<fieldset>
+  <div class='row'>
+    <section class='col col-4'>
     <label class="select">
       <select name="bucket">
       <option value="0" selected disabled>Buckets</option>
@@ -64,7 +67,7 @@
     </label>
     </section>
 
-    <section class='col col-3'>
+    <section class='col col-4'>
     <label class="select">
       <select name="country">
       <option value="0" selected disabled>Country</option>
@@ -74,80 +77,50 @@
       <i></i>
     </label>
     </section>
-  </div> <!-- End Div row -->
+
+    <section class='col col-4'>
+      <label class="checkbox">
+        <input type="checkbox" id="select_inspection_purchase">
+        <i></i>Inspection
+      </label>
+      <div class="note" id="note-inspection_purchase"></div>
+    </section>
+
+</div> <!-- End Div row -->
 </fieldset>
+
 
 <header>Cost of Purchase</header>
 <fieldset>
   <div class='row'>
-
-  <div class='col col-4'>
-    {% for _ in '012' %}
+{% for elem in cost_of_purchase_tuple %}
+    <div class='col col-4'>
+  {% for item in elem %}
       <label class="checkbox">
-        <input type="checkbox" id="select_{% cycle 'inspection' 'plane' 'train' %}_purchase">
-        <i></i>{% cycle 'Inspection' 'Plane' 'Train' %}
+        <input type="checkbox" id="select_{{ item.item }}_sale">
+        <i></i>{{ item.item}}
       </label>
-      <div class="note" id="note-{% cycle 'inspection' 'plane' 'train' %}_purchase"></div>
-      {% endfor %}
+      <div class="note" id="note-{{ item.item }}_sale"></div>
+    {% endfor %}
   </div>
-
-  <div class='col col-4'>
-    {% for _ in '012' %}
-      <label class="checkbox">
-        <input type="checkbox" id="select_{% cycle 'car' 'phone' 'dhl' %}_purchase">
-        <i></i>{% cycle 'Car' 'Phone' 'DHL' %}
-      </label>
-      <div class="note" id="note-{% cycle  'car' 'phone' 'dhl' %}_purchase"></div>
-      {% endfor %}
-  </div>
-
-  <div class='col col-4'>
-    {% for _ in '0' %}
-      <label class="checkbox">
-        <input type="checkbox" id="select_{% cycle 'various' 'v' %}_purchase">
-        <i></i>{% cycle 'Various' 'V' %}
-      </label>
-      <div class="note" id="note-{% cycle 'various' 'v' %}_purchase"></div>
-      {% endfor %}
-  </div>
-
+{% endfor %}
   </div>
 </fieldset>
 
 <header>Cost of Sale</header>
 <fieldset>
   <div class='row'>
-
+{% for elem in cost_of_sale_tuple %}
     <div class='col col-4'>
-    {% for _ in '012' %}
+  {% for item in elem %}
       <label class="checkbox">
-        <input type="checkbox" id="select_{% cycle 'car' 'nafta_maquina' 'bateria' %}_sale">
-        <i></i>{% cycle 'Car' 'Nafta Maquina' 'Bateria' %}
+        <input type="checkbox" id="select_{{ item.item }}_sale">
+        <i></i>{{ item.item}}
       </label>
-      <div class="note" id="note-{% cycle 'car' 'nafta_maquina' 'bateria' %}_sale"></div>
-      {% endfor %}
+      <div class="note" id="note-{{ item.item }}_sale"></div>
+    {% endfor %}
   </div>
-
-  <div class='col col-4'>
-    {% for _ in '012' %}
-      <label class="checkbox">
-        <input type="checkbox" id="select_{% cycle 'phone' 'mercado_libre' 'various' %}_sale">
-        <i></i>{% cycle 'Phone' 'Mercado Libre' 'Various' %}
-      </label>
-      <div class="note" id="note-{% cycle 'phone' 'mercado_libre' 'various' %}_sale"></div>
-      {% endfor %}
-  </div>
-
-    <section class='col col-4'>
-     <label class="input">
-      <div class="input-group">
-          <span class="input-group-addon">EUR</span>
-           <input type="number" name="price" placeholder="Repair">
-           <b class="tooltip tooltip-bottom-right">Estimated price of repair</b>
-        </div>
-      </label>
-    </section>
-
+{% endfor %}
   </div>
 </fieldset>
 
@@ -249,8 +222,9 @@
 <div class="tab-v1">
 <ul class="nav nav-tabs">
   <li class="active"><a href="#pane_machines" data-toggle="tab">Machines</a></li>
+  <li><a href="#pane_inspection" data-toggle="tab">Inspection</a></li>
   <li><a href="#pane_cost_of_purchase" data-toggle="tab">Cost of Purchase</a></li>
-  <li><a href="#pane_cost_of_sell" data-toggle="tab">Cost of Sale</a></li>
+  <li><a href="#pane_cost_of_sale" data-toggle="tab">Cost of Sale</a></li>
   <li><a href="#pane_transport" data-toggle="tab">Transport</a></li>
   <li><a href="#pane_aduana" data-toggle="tab">Aduana</a></li>
   <li><a href="#pane_kma" data-toggle="tab">KMA</a></li>
@@ -294,46 +268,50 @@
 <div class="tab-pane fade in" id="pane_cost_of_purchase">
 <p>
 {% include "panel_info.html" with title="Cost of Purchase" %}
-<thead></thead>
-  <tbody>
-  {% for item in cost_purchase %}
-  <tr>
-    <th>Name</th>
-    <th>{{ item.name }}</th>
-  </tr>
-  <tr>
-    <th>plane</th>
-    <td>{{ item.plane }}</td>
-  </tr>
-  <tr>
-    <th>train</th>
-    <td>{{ item.train }}</td>
-  </tr>
-  <tr>
-    <th>car</th>
-    <td>{{ item.car }}</td>
-  </tr>
-  <tr>
-    <th>phone</th>
-    <td>{{ item.phone }}</td>
-  </tr>
-  <tr>
-    <th>DHL</th>
-    <td>{{ item.dhl }}</td>
-  </tr>
-  <tr>
-    <th>various</th>
-    <td>{{ item.various }}</td>
-  </tr>
-  <tr>
-    <th>currency</th>
-    <td>{{ item.currency }}</td>
-  </tr>
-  {% endfor%}
-  </tbody>
-  </table>
+<thead>
+  <th>Name</th>
+  <th>Price</th>
+  <th>Currency</th>
+</thead>
+<tbody>
+{% for item in cost_of_purchase %}
+<tr>
+  <th>{{ item.item }}</th>
+  <td>{{ item.price }}</td>
+  <td>{{ item.currency }}</td>
+</tr>
+{% endfor%}
+</tbody>
+</table>
 </div>
+</p>
+</div><!-- end of pane -->
 
+
+<div class="tab-pane fade in" id="pane_cost_of_sale">
+<p>
+{% include "panel_info.html" with title="Cost of sale" %}
+<thead>
+  <th>Name</th>
+  <th>Price</th>
+  <th>Currency</th>
+</thead>
+<tbody>
+{% for item in cost_of_sale %}
+<tr>
+  <th>{{ item.item }}</th>
+  <td>{{ item.price }}</td>
+  <td>{{ item.currency }}</td>
+</tr>
+{% endfor%}
+</tbody>
+</table>
+</div>
+</p>
+</div><!-- end of pane -->
+
+<div class="tab-pane fade in" id="pane_inspection">
+<p>
 {% include "panel_info.html" with title="Inspection" %}
 <thead>
 <tr>
@@ -628,52 +606,6 @@
 </div>
 </p>
 </div><!-- End of pane -->
-
-<div class="tab-pane fade in" id="pane_cost_of_sell">
-<p>
-
-{% include "panel_info.html" with title="Cost of sale" %}
-<thead> </thead>
-<tbody>
-{% for item in cost_sell %}
-<tr>
-  <th>Car</th>
-  <th>{{ item.car }}</th>
-</tr>
-<tr>
-  <th>Nafta Maquina</th>
-  <td>{{ item.nafta_maquina }}</td>
-</tr>
-<tr>
-  <th>Phone</th>
-  <td>{{ item.phone }}</td>
-</tr>
-<tr>
-  <th>Bateria</th>
-  <td>{{ item.bateria }}</td>
-</tr>
-<tr>
-  <th>Mercado Libre</th>
-  <td>{{ item.mercado_libre }}</td>
-</tr>
-<tr>
-  <th>Work</th>
-  <td>{{ item.work }}</td>
-</tr>
-<tr>
-  <th>Various</th>
-  <td>{{ item.various }}</td>
-</tr>
-<tr>
-  <th>Currency</th>
-  <td>{{ item.currency }}</td>
-</tr>
-{% endfor%}
-</tbody>
-</table>
-</div>
-</p>
-</div><!-- end of pane -->
 
 <div class="tab-pane fade in" id="pane_bank_fee">
 <p>

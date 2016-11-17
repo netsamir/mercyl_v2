@@ -124,19 +124,19 @@ $(document).ready(function(){
     _update_view_with_all_currency('#cif', CIF.status());
   }); // end of change function
 
-  $('#select_inspection').change(function(){
+  $('#select_inspection_purchase').change(function(){
     // Check if inspection has been required
     var price_inspection = 0;
     if ($(this).is(':checked')){
       inspection_price = $('#table_inspection').data('inspection');
-      $('#note-inspection').html(
-          '<strong>Adding:</strong> EUR ' + inspection_price
+      $('#note-inspection_purchase').html(
+          '[<strong>+</strong> EUR ' + inspection_price + ']'
       );
       CIF.plus('inspection', inspection_price);
       _update_view_with_all_currency('#cif', CIF.status());
     } else {
       inspection_price = 0;
-      $('#note-inspection').html('');
+      $('#note-inspection_purchase').html('');
       CIF.plus('inspection', inspection_price);
       _update_view_with_all_currency('#cif', CIF.status());
     }
@@ -144,12 +144,13 @@ $(document).ready(function(){
 
 
   /*
-   * The following functions are called per transport
+   * Compute cost of purchase
    */
-  var FixCostFunctions = function(){
-
-  };
-
+  $('#plane').change(function(){
+    if ($(this).is(':checked')){
+      
+    }
+  });
   /*
    * The following functions are called at every CIF update
    */
