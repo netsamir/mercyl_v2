@@ -142,15 +142,42 @@ $(document).ready(function(){
     }
   });
 
-
   /*
-   * Compute cost of purchase
+   * Compute cost of purchase and Cost of Sale
    */
-  $('#plane').change(function(){
-    if ($(this).is(':checked')){
-      
-    }
-  });
+  var CP_CS = (function(id){
+    var cp_cs = 
+      [
+      'cost_of_purchase', 
+      'cost_of_sale'
+      ];
+    $.each(cp_cs, function(key, id){
+      $('#select_' + id).change(function(){
+        var price = 0;
+        $('#select_' + id +' input').each(function(){
+          if ($(this).is(':checked')){
+            price += _p($(this).data('price'));
+          }
+        }); // end of each
+        _update_view_with_all_currency('#' + id, price);
+      });// end of change
+    });
+  }());
+
+  // $('#select_cost_of_purchase').change(function(){
+  //   CP_CS('cost_of_purchase');
+  // });
+
+ // CP_CS('#select_cost_of_purchase');
+  //   var price = 0;
+  //   $('#select_cost_of_purchase input').each(function(){
+  //     if ($(this).is(':checked')){
+  //       price += _p($(this).data('price'));
+  //     }
+  //   })
+  //   _update_view_with_all_currency('#cost_of_purchase', price);
+  // });
+
   /*
    * The following functions are called at every CIF update
    */
@@ -178,12 +205,6 @@ $(document).ready(function(){
 
     var cif_dependent =
     [
-      {
-        'id': '#cost_of_sale',
-        'obj': _obj_maker(function(cif_value_usd){
-          return -550042;
-        })
-      },
       {
         'id': '#commission',
         'obj': _obj_maker(function(cif_value_usd){

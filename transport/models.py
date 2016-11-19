@@ -1,8 +1,14 @@
-from django.db import models
+"""
+DocString
+"""
 
+from django.db import models
 
 # Balance
 class Fix_Cost(models.Model):
+    """
+    DocString
+    """
     name = models.CharField(max_length=120, default='contadora')
     annual = models.DecimalField(max_digits=10, decimal_places=2, default=5124)
     currency = models.CharField(max_length=3, default='UYU')
@@ -14,6 +20,9 @@ class Fix_Cost(models.Model):
         return self.name
 
 class Taxes(models.Model):
+    """
+    DocString
+    """
 
     name = models.CharField(max_length=120, default='taxes')
     irae = models.DecimalField(max_digits=10, decimal_places=2, default=0.25)
@@ -24,6 +33,9 @@ class Taxes(models.Model):
         return self.name
 
 class Investment(models.Model):
+    """
+    DocString
+    """
     name = models.CharField(max_length=120)
     price = models.DecimalField(max_digits=10, decimal_places=2)
 
@@ -35,6 +47,9 @@ class Investment(models.Model):
 
 # CIF
 class Transport_Anvers(models.Model):
+    """
+    DocString
+    """
     name = models.CharField(max_length=120, default='generic')
     price = models.DecimalField(max_digits=10, decimal_places=2, default=500)
     currency = models.CharField(max_length=3, default='EUR')
@@ -46,6 +61,9 @@ class Transport_Anvers(models.Model):
         return self.name
 
 class Bucket(models.Model):
+    """
+    DocString
+    """
     size = models.CharField(max_length=120)
 
     timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
@@ -86,9 +104,14 @@ class Machine(models.Model):
         return self.kind
 
 class Cost_of_Purchase(models.Model):
+    """
+    All the price that are encountered for
+    purchasing a machine
+    """
     item = models.CharField(max_length=120)
     price = models.DecimalField(max_digits=10, decimal_places=2, default=500)
     currency = models.CharField(max_length=3, default='EUR')
+    checked = models.BooleanField()
 
     timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
     updated = models.DateTimeField(auto_now_add=False, auto_now=True)
@@ -97,6 +120,9 @@ class Cost_of_Purchase(models.Model):
         return self.item
 
 class Cost_of_Sale(models.Model):
+    """
+    DocString
+    """
     item = models.CharField(max_length=120, default='Mercyl')
     price = models.DecimalField(max_digits=10, decimal_places=2, default=500)
     currency = models.CharField(max_length=3, default='USD')
@@ -108,6 +134,9 @@ class Cost_of_Sale(models.Model):
         return self.item
 
 class Transport(models.Model):
+    """
+    DocString
+    """
     name = models.CharField(max_length=120, default='Soccar Shipping Agency')
     base_price = models.DecimalField(max_digits=10, decimal_places=2, default=440)
     currency = models.CharField(max_length=3, default='EUR')
@@ -119,6 +148,9 @@ class Transport(models.Model):
         return self.name
 
 class TaxCountry(models.Model):
+    """
+    DocString
+    """
     country = models.CharField(max_length=120, default='Denmark')
     currency = models.CharField(max_length=3, default='EUR')
     tax = models.DecimalField(max_digits=10, decimal_places=2, default=375)
@@ -130,6 +162,9 @@ class TaxCountry(models.Model):
         return self.country
 
 class Inspection(models.Model):
+    """
+    DocString
+    """
     name = models.CharField(max_length=120, default='Mevas')
     price = models.DecimalField(max_digits=10, decimal_places=2, default=500)
     currency = models.CharField(max_length=3, default='EUR')
@@ -145,6 +180,9 @@ class Inspection(models.Model):
 # ---------------------------------------------------------------------------
 
 class Aduana(models.Model):
+    """
+    DocString
+    """
     # -----------------------------------------------------------------------
     # Derechos Aduaneros
     # -----------------------------------------------------------------------
@@ -246,6 +284,9 @@ class Puerto(models.Model):
         return self.name
 
 class Kma(models.Model):
+    """
+    DocString
+    """
     name = models.CharField(max_length=120, default='KMA')
     price = models.DecimalField(max_digits=10, decimal_places=2, default=1500)
     currency = models.CharField(max_length=3, default='USD')
@@ -257,6 +298,9 @@ class Kma(models.Model):
         return self.name
 
 class Flete(models.Model):
+    """
+    DocString
+    """
     name = models.CharField(max_length=120, default='Full Cargo')
     price = models.DecimalField(max_digits=10, decimal_places=2, default=800)
     currency = models.CharField(max_length=3, default='USD')
@@ -294,6 +338,9 @@ class Honorarios(models.Model):
         return self.name
 
 class Gastos(models.Model):
+    """
+    DocString
+    """
     despachante = models.CharField(max_length=120, default='Navatta')
     price = models.DecimalField(max_digits=10, decimal_places=2, default=90)
     currency = models.CharField(max_length=3, default='USD')
@@ -309,8 +356,10 @@ class Bank_Cost(models.Model):
     """
         8.1 Ordenes de pago recibidas del exterior
         Personas Físicas U$S 10.-
-        Personas Jurídicas 1,5 por mil (mínimo U$S 25.- y maximo U$S 250.-) mas diferencia de cambio
-        Las transferencias recibidas desde el exterior tienen costos de corresponsal de acuerdo a la tabla
+        Personas Jurídicas 1,5 por mil (mínimo U$S 25.- y maximo U$S 250.-)
+        mas diferencia de cambio
+        Las transferencias recibidas desde el exterior tienen costos de
+        corresponsal de acuerdo a la tabla
         adjunta:
         Monto de la operacion Costo corresponsal
         U$S 101 – 500 U$S 10.-
@@ -318,19 +367,23 @@ class Bank_Cost(models.Model):
         U$S 2001 – 20000 U$S 25.-
         Más de U$S 20000 U$S 35.-
         8.2 Transferencias enviadas al exterior
-        Personas físicas 1,5 por mil (mínimo U$S 25.- y máximo U$S 250.-) mas diferencia de cambio más
+        Personas físicas 1,5 por mil (mínimo U$S 25.- y máximo U$S 250.-)
+        mas diferencia de cambio más
         U$S 30.- de Swift.
-        Personas Jurídicas1,8 por mil (mínimo U$S 30.- y máximo U$S 300.-) mas diferencia de cambio más
+        Personas Jurídicas1,8 por mil (mínimo U$S 30.- y máximo U$S 300.-)
+        mas diferencia de cambio más
         U$S 30.- de Swift.
-        Las transferencias enviadas al exterior tienen costos de corresponsal de acuerdo a la tabla adjunta:
+        Las transferencias enviadas al exterior tienen costos de corresponsal
+        de acuerdo a la tabla adjunta:
         Monto de la operación Costo corresponsal
         U$S 101 – 500 U$S 15.-
         U$S 501 – 2.000 U$S 20.-
         U$S 2.001 – 20.000 U$S 30.-
         Más de U$S 20.000 U$S 40.-
-        El cliente podra optar por asumir estos costos o que los mismos sean debitados al beneficiario,
-        lo que debera quedar establecido en la instruccion de giro. Por defecto se asumira esta ultima
-        opcion.
+        El cliente podra optar por asumir estos costos o que los mismos sean
+        debitados al beneficiario,
+        lo que debera quedar establecido en la instruccion de giro. Por
+        defecto se asumira esta ultima opcion.
     """
 
     name = models.CharField(max_length=120, default='Itau')

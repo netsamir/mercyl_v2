@@ -81,9 +81,8 @@
     <section class='col col-4'>
       <label class="checkbox">
         <input type="checkbox" id="select_inspection_purchase">
-        <i></i>Inspection
+        <i></i>Inspection <span class="note" id="note-inspection_purchase"></span>
       </label>
-      <div class="note" id="note-inspection_purchase"></div>
     </section>
 
 </div> <!-- End Div row -->
@@ -92,15 +91,18 @@
 
 <header>Cost of Purchase</header>
 <fieldset>
-  <div class='row'>
+  <div class='row' id='select_cost_of_purchase'>
 {% for elem in cost_of_purchase_tuple %}
     <div class='col col-4'>
   {% for item in elem %}
       <label class="checkbox">
-        <input type="checkbox" id="select_{{ item.item }}_sale">
+        <input type="checkbox" id="select_{{ item.item }}_purchase"
+        {% if item.checked %} checked {% endif %}
+        data-item={{ item.item }}
+        data-price={{ item.price }} >
         <i></i>{{ item.item}}
       </label>
-      <div class="note" id="note-{{ item.item }}_sale"></div>
+      <div class="note" id="note-{{ item.item }}_purchase"></div>
     {% endfor %}
   </div>
 {% endfor %}
@@ -109,12 +111,15 @@
 
 <header>Cost of Sale</header>
 <fieldset>
-  <div class='row'>
+  <div class='row' id='select_cost_of_sale'>
 {% for elem in cost_of_sale_tuple %}
     <div class='col col-4'>
   {% for item in elem %}
       <label class="checkbox">
-        <input type="checkbox" id="select_{{ item.item }}_sale">
+        <input type="checkbox" id="select_{{ item.item }}_sale"
+        {% if item.checked %} checked {% endif %}
+        data-item={{ item.item }}
+        data-price={{ item.price }} >
         <i></i>{{ item.item}}
       </label>
       <div class="note" id="note-{{ item.item }}_sale"></div>
