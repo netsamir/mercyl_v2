@@ -99,10 +99,10 @@
         <input type="checkbox" id="select_{{ item.item }}_purchase"
         {% if item.checked %} checked {% endif %}
         data-item={{ item.item }}
-        data-price={{ item.price }} >
-        <i></i>{{ item.item}}
+        data-price={{ item.price }}
+        data-currency={{ item.currency }} >
+        <i></i>{{ item.item}} <span class="note" id="note-{{ item.item }}_purchase"></span>
       </label>
-      <div class="note" id="note-{{ item.item }}_purchase"></div>
     {% endfor %}
   </div>
 {% endfor %}
@@ -119,10 +119,10 @@
         <input type="checkbox" id="select_{{ item.item }}_sale"
         {% if item.checked %} checked {% endif %}
         data-item={{ item.item }}
-        data-price={{ item.price }} >
-        <i></i>{{ item.item}}
+        data-price={{ item.price }}
+        data-currency={{ item.currency }} >
+        <i></i>{{ item.item}} <span class="note" id="note-{{ item.item }}_sale"></span>
       </label>
-      <div class="note" id="note-{{ item.item }}_sale"></div>
     {% endfor %}
   </div>
 {% endfor %}

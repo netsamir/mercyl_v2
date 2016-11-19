@@ -146,37 +146,31 @@ $(document).ready(function(){
    * Compute cost of purchase and Cost of Sale
    */
   var CP_CS = (function(id){
-    var cp_cs = 
+    var cp_cs =
       [
-      'cost_of_purchase', 
-      'cost_of_sale'
+      'purchase',
+      'sale'
       ];
     $.each(cp_cs, function(key, id){
-      $('#select_' + id).change(function(){
+      $('#select_cost_of_' + id).change(function(){
+        var total = 0;
         var price = 0;
-        $('#select_' + id +' input').each(function(){
+        $('#select_cost_of_' + id + ' input').each(function(){
           if ($(this).is(':checked')){
-            price += _p($(this).data('price'));
+            price = _p($(this).data('price'));
+            total += price;
+            $('#note-' + $(this).data('item') + '_' + id).html(
+                '[<strong>+</strong> ' + $(this).data('currency')
+                + ' ' + price + ']'
+            );
+          } else {
+            $('#note-' + $(this).data('item') + '_' + id).html('');
           }
         }); // end of each
-        _update_view_with_all_currency('#' + id, price);
+        _update_view_with_all_currency('#cost_of_' + id, total);
       });// end of change
     });
   }());
-
-  // $('#select_cost_of_purchase').change(function(){
-  //   CP_CS('cost_of_purchase');
-  // });
-
- // CP_CS('#select_cost_of_purchase');
-  //   var price = 0;
-  //   $('#select_cost_of_purchase input').each(function(){
-  //     if ($(this).is(':checked')){
-  //       price += _p($(this).data('price'));
-  //     }
-  //   })
-  //   _update_view_with_all_currency('#cost_of_purchase', price);
-  // });
 
   /*
    * The following functions are called at every CIF update
