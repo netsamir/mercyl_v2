@@ -126,6 +126,7 @@ class Cost_of_Sale(models.Model):
     item = models.CharField(max_length=120, default='Mercyl')
     price = models.DecimalField(max_digits=10, decimal_places=2, default=500)
     currency = models.CharField(max_length=3, default='USD')
+    checked = models.BooleanField()
 
     timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
     updated = models.DateTimeField(auto_now_add=False, auto_now=True)
@@ -352,7 +353,7 @@ class Gastos(models.Model):
         return self.despachante
 
 
-class Bank_Cost(models.Model):
+class BankCost(models.Model):
     """
         8.1 Ordenes de pago recibidas del exterior
         Personas Físicas U$S 10.-
@@ -387,11 +388,13 @@ class Bank_Cost(models.Model):
     """
 
     name = models.CharField(max_length=120, default='Itau')
-    transfer_out_local = models.DecimalField(max_digits=10, decimal_places=2, default=10)
-    transfer_in_local = models.DecimalField(max_digits=10, decimal_places=2, default=10)
-    transfer_out_international = models.DecimalField(max_digits=10, decimal_places=2, default=150)
-    commission_usd_eur = models.DecimalField(max_digits=10, decimal_places=2, default=10)
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=10)
     currency = models.CharField(max_length=3, default='USD')
+
+    # transfer_out_local = models.DecimalField(max_digits=10, decimal_places=2, default=10)
+    # transfer_in_local = models.DecimalField(max_digits=10, decimal_places=2, default=10)
+    # transfer_out_international = models.DecimalField(max_digits=10, decimal_places=2, default=150)
+    # commission_usd_eur = models.DecimalField(max_digits=10, decimal_places=2, default=10)
 
     timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
     updated = models.DateTimeField(auto_now_add=False, auto_now=True)

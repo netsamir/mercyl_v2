@@ -1,6 +1,8 @@
 $(document).ready(function(){
 
-  // Module variable
+  /*
+   * Ajax function that retrieve the current exchange rate
+   */
   var XE = (function(){
     // AP ID: 1bc44a86ebb244dcad64ceb38d56847f
     var currency = {
@@ -19,16 +21,33 @@ $(document).ready(function(){
           $('#ex_usd').val(currency.usd_usd);
           $('#ex_eur').val(currency.usd_eur);
           $('#ex_uyu').val(currency.usd_uyu);
+
+          /*
+           * Call-back functions
+           */
+
+          CPCS.compute_and_update_view();
+          FixCosts.compute_and_udate_view();
         });
       },
       rate: function(cur){
         return currency[cur];
       },
+
       from_eur_to_usd: function(eur_value){
         return eur_value / currency['usd_eur'];
       },
+      from_uyu_to_usd: function(uyu_value){
+        return uyu_value / currency['usd_uyu']
+      },
       from_usd_to_eur: function(usd_value){
         return usd_value * currency['usd_eur'];
+      },
+      from_usd_to_uyu: function(usd_value){
+        return usd_value * currency['usd_uyu']
+      },
+      from_uyu_to_eur: function(uyu_value){
+        return uyu_value / currency['usd_uyu'] * currency['usd_eur']
       },
       from_eur_to_uyu: function(eur_value){
         return eur_value / currency['usd_eur'] * currency['usd_uyu'];
@@ -37,8 +56,85 @@ $(document).ready(function(){
   }());
 
   XE.init();
+  /* Compute fix cost
+   */
+  var FixCosts = (function(){
+    var fix_costs = [
+      'kma',
+      'transport_anvers',
+      'bank_fee',
+      'flete'
+    ];
+    return {
+      compute_and_udate_view: function(){
+        $.each(fix_costs, function(key, id){
+            var price = _p($('#table_' + id).data('value'));
+            var currency = $('#table_' + id).data('currency');
+            _update_view_with_all_currency2('#' + id, price, currency);
+        });
+      },
+    }
+  }());
+  /*
+   * Compute cost of purchase and Cost of Sale
+   */
+  var CPCS = (function(){
+    var cp_cs = [
+      {'id': 'purchase',
+        'total': 0,
+        'currency': 'EUR'
+      },
+      {'id': 'sale',
+        'total': 0,
+        'currency': 'USD'
+      }
+    ];
+    return {
+      selector: function(){
+        return cp_cs;
+      },
+      compute_and_update_view: function(){
+        $.each(cp_cs, function(key, elem){
+          var id = elem['id']
+          var total = 0;
+          var price = 0;
+          $('#select_cost_of_' + id + ' input').each(function(){
+            if ($(this).is(':checked')){
+              price = _p($(this).data('price'));
+              total += price;
+              $('#note-' + $(this).data('item') + '_' + id).html(
+                  '[<strong>+</strong> ' + $(this).data('currency')
+                  + ' ' + price + ']'
+              );
+            } else {
+              $('#note-' + $(this).data('item') + '_' + id).html('');
+            }
+          }); // end of each
+          elem['total'] = total;
+          _update_view_with_all_currency2('#cost_of_' + id,
+              elem['total'], elem['currency']);
+        }); // end of function $.each
+      }, // end of compute_and_udpate_view
 
+    };
+  }());
+
+  $.each(CPCS.selector(), function(key, elem){
+    var id = elem['id']
+    $('#select_cost_of_' + id).change(function(){
+      CPCS.compute_and_update_view();
+    });// end of change
+  });
+
+  /* Functions that use to build the CIF:
+   * - Purchase
+   * - Transport
+   * - Inspection
+   * Everytime one of these item is updated this object will be
+   * updated because it stores the total of all items.
+   */
   var CIF = (function(){
+    // Compute the CIF
     // Every calculation that use the CIF in Uruguay should
     // be made with USD
     var weight = 1;
@@ -69,24 +165,6 @@ $(document).ready(function(){
       }
     };
   }());
-
-  // Compute the commission:
-  // Input :
-  //   - percentage: #commission-value
-  //   - CIF value: CIF.status()
-  // Description:
-  //  Update #commission = percentage * CIF Value
-  //
-  $('#commission_slider').slider({
-    min: 0,
-    value: 15,
-    max: 100,
-    slide: function(event, ui) {
-      $('#commission_value').text(ui.value);
-      var rate = $('#commission_value').text()/100;
-      _update_view_with_all_currency('#commission', CIF.total() * rate);
-    }
-  });
 
   /*
    * Collect information from the user to create CIF
@@ -143,37 +221,35 @@ $(document).ready(function(){
   });
 
   /*
-   * Compute cost of purchase and Cost of Sale
+   * The following functions depends on the value of the CIF.
+   * Their values depends on the CIF.
    */
-  var CP_CS = (function(id){
-    var cp_cs =
-      [
-      'purchase',
-      'sale'
-      ];
-    $.each(cp_cs, function(key, id){
-      $('#select_cost_of_' + id).change(function(){
-        var total = 0;
-        var price = 0;
-        $('#select_cost_of_' + id + ' input').each(function(){
-          if ($(this).is(':checked')){
-            price = _p($(this).data('price'));
-            total += price;
-            $('#note-' + $(this).data('item') + '_' + id).html(
-                '[<strong>+</strong> ' + $(this).data('currency')
-                + ' ' + price + ']'
-            );
-          } else {
-            $('#note-' + $(this).data('item') + '_' + id).html('');
-          }
-        }); // end of each
-        _update_view_with_all_currency('#cost_of_' + id, total);
-      });// end of change
-    });
-  }());
 
-  /*
-   * The following functions are called at every CIF update
+  /* Commission Slider will determine the value of the commission
+   * Mercyl will take on the value of the CIF
+   *
+   * Compute the commission:
+   * Input :
+   *  - percentage: #commission-value
+   *  - CIF value: CIF.status()
+   * Description:
+   * Update #commission = percentage * CIF Value
+   */
+
+  $('#commission_slider').slider({
+    min: 0,
+    value: 15,
+    max: 100,
+    slide: function(event, ui) {
+      $('#commission_value').text(ui.value);
+      var rate = $('#commission_value').text()/100;
+      _update_view_with_all_currency('#commission', CIF.total() * rate);
+    }
+  });
+
+  /* These functions will derived their value when the CIF is
+   * changed, whether it is caused by the purchase, the transport
+   * or the inspection
    */
   var CIFFunctions = function(){
     var g_weight = 1;
@@ -368,6 +444,10 @@ $(document).ready(function(){
       }
     };
   };
+
+  // var Total = (function(){
+  //   var total = 0;
+  // }());
   /*
    * helper functions
    */
@@ -379,6 +459,7 @@ $(document).ready(function(){
     //
     // Condition:
     // Value of eur_value should be in EUR
+
     usd_value = XE.from_eur_to_usd(eur_value);
     uyu_value = XE.from_eur_to_uyu(eur_value);
 
@@ -387,6 +468,32 @@ $(document).ready(function(){
     $(id + ' :input[name="uyu"]').val(_r(uyu_value));
   };
 
+  function _update_view_with_all_currency2(id, value, currency){
+    // Because I am retrieving the information with USD Base
+    // I have to convert the value to USD before computing the UYU
+    // I keep the USD value based because it is easier to everyone
+    // to check its currency
+    //
+    // Condition:
+    // Value of eur_value should be in EUR
+    if(currency === 'USD'){
+      usd_value = value;
+      eur_value = XE.from_usd_to_eur(value);
+      uyu_value = XE.from_usd_to_uyu(value);
+    } else if (currency === 'UYU'){
+      uyu_value = value;
+      usd_value = XE.from_uyu_to_usd(value);
+      eur_value = XE.from_uyu_to_eur(value);
+    } else { // currency == 'eur'
+      eur_value = value;
+      usd_value = XE.from_eur_to_usd(value);
+      uyu_value = XE.from_eur_to_uyu(value);
+    }
+
+    $(id + ' :input[name="eur"]').val(_r(eur_value));
+    $(id + ' :input[name="usd"]').val(_r(usd_value));
+    $(id + ' :input[name="uyu"]').val(_r(uyu_value));
+  };
   function _p(x){
     return parseFloat(x)
   };

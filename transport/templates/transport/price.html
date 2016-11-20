@@ -160,12 +160,13 @@
   </div>
  </section>
 </fieldset>
+
 <fieldset>
-{% for _ in '0123456789ABCDEFG' %}
+{% for _ in '012345' %}
  <section>
-   <div class='row' id="{% cycle 'cost_of_purchase' 'cost_of_sale' 'transport' 'transport_anvers' 'timbre' 'guia' 'empadronamiento' 'kma' 'bank_fee' 'puerto' 'vat' 'tsa' 'extrao' 'recargo' 'despachante' 'flete' 'commission' %}">
+   <div class='row' id="{% cycle 'cost_of_purchase' 'cost_of_sale' 'transport_anvers' 'kma' 'bank_fee' 'flete' %}">
     <label class="label col col-3">
-    {% cycle 'Cost of Purchase' 'Cost of Sale' 'Transport Montevideo' 'Transport Anvers' 'Timbre Profesional' 'Guia de Transito' 'Cert. Empadronamiento' 'KMA' 'Bank Fee' 'Puerto' 'VAT' 'TSA' 'Extraordinario' 'Recargo' 'Despachante' 'Flete Minas' 'Commission Mercyl' %}</label>
+    {% cycle 'Cost of Purchase' 'Cost of Sale' 'Transport Anvers' 'KMA' 'Bank Fee' 'Flete Minas' %}</label>
     {% for _ in 'xxx' %}
      <div class="col col-3">
       <label class="input">
@@ -180,6 +181,28 @@
  </section>
 {% endfor %}
 </fieldset>
+
+<fieldset>
+{% for _ in '0123456789A' %}
+ <section>
+   <div class='row' id="{% cycle 'transport' 'timbre' 'guia' 'empadronamiento' 'puerto' 'vat' 'tsa' 'extrao' 'recargo' 'despachante' 'commission' %}">
+    <label class="label col col-3">
+    {% cycle 'Transport to Uruguay ' 'Timbre Profesional' 'Guia de Transito' 'Cert. Empadronamiento' 'Puerto' 'VAT' 'TSA' 'Extraordinario' 'Recargo' 'Despachante' 'Commission Mercyl' %}</label>
+    {% for _ in 'xxx' %}
+     <div class="col col-3">
+      <label class="input">
+       <div class="input-group">
+         <span class="input-group-addon">{% cycle 'EUR' 'USD' 'UYU' %}</span>
+         <input type="number" name="{% cycle 'eur' 'usd' 'uyu' %}" disabled>
+       </div>
+     </label>
+    </div>
+    {% endfor %}
+  </div>
+ </section>
+{% endfor %}
+</fieldset>
+
 
 <fieldset>
  <label class="label">Commission: <span id="commission_value">15</span> % of CIF</label>
@@ -350,7 +373,9 @@
 </thead>
 <tbody>
 {% for item in transport_anvers %}
-<tr>
+  <tr id="table_transport_anvers" 
+    data-value={{ item.price }}
+    data-currency={{ item.currency }}>
   <td> {{ item.name }} </td>
   <td> {{ item.price }} </td>
   <td> {{ item.currency }} </td>
@@ -372,7 +397,9 @@
 {% for item in transport %}
 <tr>
   <td> {{ item.name }} </td>
-  <td id='table_price_mvd' data-base_price={{ item.base_price }}>{{ item.base_price }} </td>
+  <td id='table_price_mvd' 
+    data-base_price={{ item.base_price }}>
+    {{ item.base_price }} </td>
   <td> {{ item.currency }} </td>
 </tr>
 {% endfor%}
@@ -390,7 +417,9 @@
 </thead>
 <tbody>
 {% for item in flete %}
-<tr>
+  <tr id="table_flete" 
+    data-value={{ item.price }}
+    data-currency={{ item.currency }}>
   <td> {{ item.name }} </td>
   <td> {{ item.price }}</td>
   <td> {{ item.currency }}</td>
@@ -551,13 +580,19 @@
   <tr>
     <th>Name</th>
     <th>Price</th>
+    <th>Currency</th>
   </tr>
 </thead>
 <tbody>
 {% for item in kma %}
 <tr>
-  <td> {{ item.name }} </td>
-  <td id="table_kma" data-value="item.price"> {{ item.price }}</td>
+  <td>{{ item.name }}</td>
+  <td id="table_kma" 
+    data-value={{ item.price }}
+    data-currency={{ item.currency }}>
+    {{ item.price }}
+  </td>
+  <td>{{ item.currency }}</td>
 </tr>
 {% endfor%}
 </tbody>
@@ -571,7 +606,6 @@
 {% include "panel_info.html" with title="Despachante - Gastos" %}
 <thead>
   <tr>
-    <th></th>
     <th>Name</th>
     <th>Price</th>
   </tr>
@@ -580,7 +614,8 @@
 {% for item in gastos %}
 <tr>
   <td> {{ item.despachante }} </td>
-  <td id="despa_gastos" data-despa_gastos="{{ item.price }}">{{ item.price }}</td>
+  <td id="despa_gastos" 
+    data-despa_gastos="{{ item.price }}">{{ item.price }}</td>
 </tr>
 {% endfor%}
 </tbody>
@@ -615,32 +650,26 @@
 <p>
 {% include "panel_info.html" with title="Bank fees" %}
 <thead>
+    <th>Name</th>
+    <th>Price</th>
+    <th>Currency</th>
 </thead>
+<tfoot>
+  <tr>
+    <th>Total</th>
+    <th id="table_bank_fee" 
+    data-value={{ total_bank_cost }}
+    data-currency='USD'> 
+    {{ total_bank_cost }}</td>
+      <th>USD</td>
+    </tr>
+  </tfoot>
 <tbody>
 {% for item in bank_cost %}
 <tr>
-    <th>Name</th>
-    <td>{{ item.name }}</td
-</tr>
-<tr>
-    <th>Transfer Out Local</th>
-    <td>{{ item.transfer_out_local }}</td
-</tr>
-<tr>
-    <th>Transfer In Local</th>
-    <td>{{ item.transfer_in_local }}</td
-</tr>
-<tr>
-    <th>Transfer Out International</th>
-    <td>{{ item.transfer_out_international }}</td
-</tr>
-<tr>
-    <th>Commission USD EUR</th>
-    <td>{{ item.commission_usd_eur }}</td
-</tr>
-<tr>
-    <th>currency</th>
-    <td>{{ item.currency }}</td
+  <td>{{ item.name }}</td>
+  <td>{{ item.price }}</td>
+  <td>{{ item.currency }}</td>
 </tr>
 {% endfor%}
 </tbody>

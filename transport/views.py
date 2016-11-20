@@ -4,6 +4,7 @@ The view for the machine price simulator
 
 from django.shortcuts import render
 from django.views.generic import TemplateView
+from django.db.models import Sum
 
 from .models import (Machine,
                      Cost_of_Purchase,
@@ -21,7 +22,7 @@ from .models import (Machine,
                      Honorarios,
                      Transport_Anvers,
                      Bucket,
-                     Bank_Cost)
+                     BankCost)
 
 def make_tuple(lst, col):
     """
@@ -38,7 +39,6 @@ class TransportView(TemplateView):
     template_name = 'transport/price.html'
 
     def get(self, request):
-
         context = {
             'title' : "Machine price (Simulation)",
             'machine' : Machine.objects.all(),
@@ -61,7 +61,8 @@ class TransportView(TemplateView):
             'honorarios' : Honorarios.objects.all(),
             'transport_anvers' : Transport_Anvers.objects.all(),
             'bucket' : Bucket.objects.all(),
-            'bank_cost' : Bank_Cost.objects.all(),
+            'bank_cost' : BankCost.objects.all(),
+            'total_bank_cost' : BankCost.objects.all().aggregate(Sum('price'))['price__sum']
         }
 
         return render(request, self.template_name, context)

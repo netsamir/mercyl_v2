@@ -1,9 +1,31 @@
+"""
+Admin of Transport
+"""
 from django.contrib import admin
 
 # Register your models here.
-from .models import *
+from .models import (Machine,
+                     Cost_of_Purchase,
+                     Cost_of_Sale,
+                     Transport,
+                     TaxCountry,
+                     Aduana,
+                     Flete,
+                     Kma,
+                     Inspection,
+                     Tsa,
+                     Extraordinario,
+                     Puerto,
+                     Gastos,
+                     Honorarios,
+                     Transport_Anvers,
+                     Bucket,
+                     BankCost)
 
 class MachineModelAdmin(admin.ModelAdmin):
+    """
+    Admin view
+    """
     list_display = ["kind", "brand", "model", "length", "width", "height",
                     "weight", "comment", "timestamp", "updated"]
     class Meta:
@@ -23,9 +45,6 @@ admin.site.register(Extraordinario)
 admin.site.register(Puerto)
 admin.site.register(Gastos)
 admin.site.register(Honorarios)
-admin.site.register(Bank_Cost)
-admin.site.register(Fix_Cost)
-admin.site.register(Investment)
+admin.site.register(BankCost)
 admin.site.register(Bucket)
-admin.site.register(Taxes)
 admin.site.register(Transport_Anvers)
