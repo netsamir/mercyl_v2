@@ -203,7 +203,6 @@
 {% endfor %}
 </fieldset>
 
-
 <fieldset>
  <label class="label">Commission: <span id="commission_value">15</span> % of CIF</label>
  <div id="commission_slider"></div>
@@ -213,11 +212,11 @@
 </fieldset>
 <header>Summary</header>
 <fieldset>
-{% for _ in '0123' %}
+{% for _ in '012' %}
  <section>
-   <div class="row" id="{% cycle 'purchase_price' 'cif' 'total_cost' 'selling_price_with_vat' %}">
+   <div class="row" id="{% cycle 'purchase_price' 'cif' 'selling_price_with_vat' %}">
     <label class="label col col-3">
-      {% cycle 'Purchase Price' 'CIF' 'Total Cost' 'Selling Price with VAT' %}
+      {% cycle 'Purchase Price' 'CIF' 'Selling Price with VAT' %}
     </label>
     {% for _ in 'xxx' %}
      <div class="col col-3">

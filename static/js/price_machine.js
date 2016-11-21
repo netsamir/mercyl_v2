@@ -25,9 +25,8 @@ $(document).ready(function(){
           /*
            * Call-back functions
            */
-
           CPCS.compute_and_update_view();
-          FixCosts.compute_and_udate_view();
+          FixCosts.compute_and_update_view();
         });
       },
       rate: function(cur){
@@ -56,28 +55,52 @@ $(document).ready(function(){
   }());
 
   XE.init();
-  /* Compute fix cost
+
+  /* Compute Total
    */
-  var FixCosts = (function(){
-    var fix_costs = [
-      'kma',
-      'transport_anvers',
-      'bank_fee',
-      'flete'
-    ];
-    return {
-      compute_and_udate_view: function(){
-        $.each(fix_costs, function(key, id){
-            var price = _p($('#table_' + id).data('value'));
-            var currency = $('#table_' + id).data('currency');
-            _update_view_with_all_currency2('#' + id, price, currency);
-        });
-      },
-    }
-  }());
-  /*
-   * Compute cost of purchase and Cost of Sale
+  var g_total = {};
+  function total_compute_and_update_view(){
+    l = _.reduce(_.values(g_total), function(x, y){
+      return x + y;}, 0);
+    _update_view_with_all_currency2('#selling_price_with_vat', l, 'USD');
+  };
+
+  /* Compute Total
    */
+  // var Total = (function(){
+  //   // Instance store a reference to the singleton
+  //   var instance;
+  //   function createInstance(){
+  //     var total = {};
+
+  //     return {
+  //       add: function(id, price){
+  //         total[id] = price;
+  //         console.log(id, price);
+  //       },
+  //       compute_and_update_view: function(){
+  //         total = _.reduce(_.values(total), function(x, y){
+  //           return x + y;}, 0);
+  //         _update_view_with_all_currency2('#total_cost', total, 'USD');
+  //         console.log('Compute and Update view is called:');
+  //         console.log(total);
+  //       },// end of add
+  //     }
+  //   };
+  //   return {
+  //     // Get the Singleton instance if one exists
+  //     // or create one if it doesn't
+  //     getInstance: function(){
+  //       if(!instance){
+  //         instance = createInstance();
+  //       }
+  //       return instance;
+  //     }
+  //   }
+  // }());
+
+  /* Compute cost of purchase and Cost of Sale
+   *******************************************/
   var CPCS = (function(){
     var cp_cs = [
       {'id': 'purchase',
@@ -113,9 +136,10 @@ $(document).ready(function(){
           elem['total'] = total;
           _update_view_with_all_currency2('#cost_of_' + id,
               elem['total'], elem['currency']);
+            g_total[id] = total;
         }); // end of function $.each
+        total_compute_and_update_view();
       }, // end of compute_and_udpate_view
-
     };
   }());
 
@@ -126,6 +150,30 @@ $(document).ready(function(){
     });// end of change
   });
 
+  /* Compute fix cost
+   ******************/
+  var FixCosts = (function(){
+    var fix_costs = [
+      'kma',
+      'transport_anvers',
+      'bank_fee',
+      'flete'
+    ];
+    return {
+      compute_and_update_view: function(){
+        $.each(fix_costs, function(key, id){
+            var price = _p($('#table_' + id).data('value'));
+            var currency = $('#table_' + id).data('currency');
+            _update_view_with_all_currency2('#' + id, price, currency);
+            g_total[id] = price;
+        });
+        total_compute_and_update_view();
+      },
+    }
+  }());
+
+  /* Compute CIF
+   ******************/
   /* Functions that use to build the CIF:
    * - Purchase
    * - Transport
@@ -161,6 +209,8 @@ $(document).ready(function(){
         cif_total_eur = _.reduce(_.values(total), function(x, y){
           return x + y;}, 0);
         CIFFunctions().compute_and_update_view(cif_total_eur, weight);
+        g_total['cif'] = cif_total_eur;
+        total_compute_and_update_view();
         return cif_total_eur;
       }
     };
@@ -220,6 +270,8 @@ $(document).ready(function(){
     }
   });
 
+  /* Compute the CIF dependable value
+   * ********************************
   /*
    * The following functions depends on the value of the CIF.
    * Their values depends on the CIF.
@@ -243,7 +295,10 @@ $(document).ready(function(){
     slide: function(event, ui) {
       $('#commission_value').text(ui.value);
       var rate = $('#commission_value').text()/100;
-      _update_view_with_all_currency('#commission', CIF.total() * rate);
+      var value_commission = CIF.total() * rate;
+      _update_view_with_all_currency('#commission', value_commission);
+      g_total['commission'] = value_commission;
+      total_compute_and_update_view();
     }
   });
 
@@ -262,6 +317,8 @@ $(document).ready(function(){
         var value_output_usd = this.func(cif_value_usd);
         var value_output_eur = XE.from_usd_to_eur(value_output_usd);
         _update_view_with_all_currency(id, value_output_eur);
+        g_total[id] = value_output_eur;
+        total_compute_and_update_view();
       },
     };
 
@@ -445,9 +502,6 @@ $(document).ready(function(){
     };
   };
 
-  // var Total = (function(){
-  //   var total = 0;
-  // }());
   /*
    * helper functions
    */
