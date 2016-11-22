@@ -183,11 +183,11 @@
 </fieldset>
 
 <fieldset>
-{% for _ in '0123456789A' %}
+{% for _ in '0123456789' %}
  <section>
-   <div class='row' id="{% cycle 'transport' 'timbre' 'guia' 'empadronamiento' 'puerto' 'vat' 'tsa' 'extrao' 'recargo' 'despachante' 'commission' %}">
+   <div class='row' id="{% cycle 'transport' 'timbre' 'guia' 'empadronamiento' 'puerto' 'vat' 'tsa' 'extrao' 'recargo' 'despachante' %}">
     <label class="label col col-3">
-    {% cycle 'Transport to Uruguay ' 'Timbre Profesional' 'Guia de Transito' 'Cert. Empadronamiento' 'Puerto' 'VAT' 'TSA' 'Extraordinario' 'Recargo' 'Despachante' 'Commission Mercyl' %}</label>
+    {% cycle 'Transport to Uruguay ' 'Timbre Profesional' 'Guia de Transito' 'Cert. Empadronamiento' 'Puerto' 'VAT' 'TSA' 'Extraordinario' 'Recargo' 'Despachante' %}</label>
     {% for _ in 'xxx' %}
      <div class="col col-3">
       <label class="input">
@@ -212,11 +212,11 @@
 </fieldset>
 <header>Summary</header>
 <fieldset>
-{% for _ in '012' %}
+{% for _ in '0123456789' %}
  <section>
-   <div class="row" id="{% cycle 'purchase_price' 'cif' 'selling_price_with_vat' %}">
+   <div class="row" id="{% cycle 'purchase_price' 'cif' 'total_cost' 'commission' 'selling_price' 'vat_sale' 'selling_price_with_vat' 'vat_to_pay' 'cash_inflow' 'return_before_tax' %}">
     <label class="label col col-3">
-      {% cycle 'Purchase Price' 'CIF' 'Selling Price with VAT' %}
+      {% cycle 'Purchase Price' 'CIF' 'Total Cost' 'Commission Mercyl' 'Selling Price' 'VAT' 'Selling Price with VAT' 'VAT to pay' 'Cash Inflow' 'Return before tax' %}
     </label>
     {% for _ in 'xxx' %}
      <div class="col col-3">
@@ -372,7 +372,7 @@
 </thead>
 <tbody>
 {% for item in transport_anvers %}
-  <tr id="table_transport_anvers" 
+  <tr id="table_transport_anvers"
     data-value={{ item.price }}
     data-currency={{ item.currency }}>
   <td> {{ item.name }} </td>
@@ -396,7 +396,7 @@
 {% for item in transport %}
 <tr>
   <td> {{ item.name }} </td>
-  <td id='table_price_mvd' 
+  <td id='table_price_mvd'
     data-base_price={{ item.base_price }}>
     {{ item.base_price }} </td>
   <td> {{ item.currency }} </td>
@@ -416,7 +416,7 @@
 </thead>
 <tbody>
 {% for item in flete %}
-  <tr id="table_flete" 
+  <tr id="table_flete"
     data-value={{ item.price }}
     data-currency={{ item.currency }}>
   <td> {{ item.name }} </td>
@@ -586,7 +586,7 @@
 {% for item in kma %}
 <tr>
   <td>{{ item.name }}</td>
-  <td id="table_kma" 
+  <td id="table_kma"
     data-value={{ item.price }}
     data-currency={{ item.currency }}>
     {{ item.price }}
@@ -613,7 +613,7 @@
 {% for item in gastos %}
 <tr>
   <td> {{ item.despachante }} </td>
-  <td id="despa_gastos" 
+  <td id="despa_gastos"
     data-despa_gastos="{{ item.price }}">{{ item.price }}</td>
 </tr>
 {% endfor%}
@@ -656,9 +656,9 @@
 <tfoot>
   <tr>
     <th>Total</th>
-    <th id="table_bank_fee" 
+    <th id="table_bank_fee"
     data-value={{ total_bank_cost }}
-    data-currency='USD'> 
+    data-currency='USD'>
     {{ total_bank_cost }}</td>
       <th>USD</td>
     </tr>

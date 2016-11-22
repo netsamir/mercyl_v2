@@ -58,46 +58,81 @@ $(document).ready(function(){
 
   /* Compute Total
    */
-  var g_total = {};
-  function total_compute_and_update_view(){
-    l = _.reduce(_.values(g_total), function(x, y){
-      return x + y;}, 0);
-    _update_view_with_all_currency2('#selling_price_with_vat', l, 'USD');
-  };
 
-  /* Compute Total
-   */
-  // var Total = (function(){
-  //   // Instance store a reference to the singleton
-  //   var instance;
-  //   function createInstance(){
-  //     var total = {};
+  var Total = (function(){
+    // Total will be stored in USD
+    var total = {
+      'commission': 0,
+      'vat': 0
+    };
 
-  //     return {
-  //       add: function(id, price){
-  //         total[id] = price;
-  //         console.log(id, price);
-  //       },
-  //       compute_and_update_view: function(){
-  //         total = _.reduce(_.values(total), function(x, y){
-  //           return x + y;}, 0);
-  //         _update_view_with_all_currency2('#total_cost', total, 'USD');
-  //         console.log('Compute and Update view is called:');
-  //         console.log(total);
-  //       },// end of add
-  //     }
-  //   };
-  //   return {
-  //     // Get the Singleton instance if one exists
-  //     // or create one if it doesn't
-  //     getInstance: function(){
-  //       if(!instance){
-  //         instance = createInstance();
-  //       }
-  //       return instance;
-  //     }
-  //   }
-  // }());
+    return {
+      //add: function(id, price, currency = 'USD'){
+      add: function(id, price){
+        // switch(currency){
+        //   case 'EUR':
+        //     price = XE.from_eur_to_usd(price);
+        //   case 'UYU':
+        //     price = XE.from_uyu_to_usd(price);
+        //   default:
+        // }
+        total[id] = price;
+        console.log(id, price);
+      },
+      compute_and_update_view: function(){
+        // Compute total of costs:
+        // - Machine + Transport + Inspection : CIF
+        // - Cost of Purchase and of Sale
+        // - All fix cost when a machine is exported
+        // - All cost related to the CIF including the commission
+        total_cost_with_commission = _.reduce(_.values(total), function(x, y){
+          return x + y;}, 0);
+
+        commission = total['commission'];
+        console.log('commission', commission);
+        // Total Cost
+        total_cost = total_cost_with_commission - commission;
+        _update_view_with_all_currency2('#total_cost',
+            total_cost, 'USD');
+        console.log('total_cost', total_cost);
+        // Compute the selling price
+        selling_price = total_cost + commission;
+        _update_view_with_all_currency2('#selling_price',
+           selling_price, 'USD');
+        console.log('selling_price', selling_price)
+        // // Compute vat
+        vat_sale = selling_price * 0.22;
+        _update_view_with_all_currency2('#vat_sale',
+            vat_sale, 'USD');
+        // // Compute Sale price with VAT
+        console.log('vat_sale', vat_sale);
+        // // Compute vat
+        selling_price_with_vat = selling_price + vat_sale;
+        _update_view_with_all_currency2('#selling_price_with_vat',
+            selling_price_with_vat, 'USD');
+        console.log('selling_price_with_vat', selling_price_with_vat)
+        // // Vat to pay
+        vat_to_pay = vat_sale - total['vat'];
+        _update_view_with_all_currency2('#vat_to_pay',
+            vat_to_pay, 'USD');
+        console.log('vat_to_pay', vat_to_pay);
+        // // Cash Inflow
+        cash_inflow = selling_price_with_vat;
+        if(vat_to_pay > 0){
+          cash_inflow = selling_price_with_vat - vat_to_pay;
+        };
+        _update_view_with_all_currency2('#cash_inflow',
+            cash_inflow, 'USD');
+        console.log('cash_inflow', cash_inflow);
+        // // Return before tax
+        return_before_tax = cash_inflow - total_cost;
+        _update_view_with_all_currency2('#return_before_tax',
+            return_before_tax, 'USD');
+        console.log('return_before_tax', return_before_tax);
+      },// end of compute_and_update
+    }
+  }());
+
 
   /* Compute cost of purchase and Cost of Sale
    *******************************************/
@@ -136,9 +171,10 @@ $(document).ready(function(){
           elem['total'] = total;
           _update_view_with_all_currency2('#cost_of_' + id,
               elem['total'], elem['currency']);
-            g_total[id] = total;
+            //Total.add(id, total, elem['currency']);
+            Total.add(id, total);
         }); // end of function $.each
-        total_compute_and_update_view();
+        Total.compute_and_update_view();
       }, // end of compute_and_udpate_view
     };
   }());
@@ -164,10 +200,12 @@ $(document).ready(function(){
         $.each(fix_costs, function(key, id){
             var price = _p($('#table_' + id).data('value'));
             var currency = $('#table_' + id).data('currency');
-            _update_view_with_all_currency2('#' + id, price, currency);
-            g_total[id] = price;
+            //_update_view_with_all_currency2('#' + id, price, currency);
+            _update_view_with_all_currency2('#' + id, price);
+            //Total.add(id, price, currency);
+            Total.add(id, price);
         });
-        total_compute_and_update_view();
+        Total.compute_and_update_view();
       },
     }
   }());
@@ -209,8 +247,9 @@ $(document).ready(function(){
         cif_total_eur = _.reduce(_.values(total), function(x, y){
           return x + y;}, 0);
         CIFFunctions().compute_and_update_view(cif_total_eur, weight);
-        g_total['cif'] = cif_total_eur;
-        total_compute_and_update_view();
+        //Total.add('cif', cif_total_eur, 'EUR');
+        Total.add('cif', cif_total_eur);
+        Total.compute_and_update_view();
         return cif_total_eur;
       }
     };
@@ -224,8 +263,9 @@ $(document).ready(function(){
   $('#input_price').change(function(){
     // Retrieving purchase price
     var purchase_price = $(this).val();
-    _update_view_with_all_currency('#purchase_price', purchase_price);
+    _update_view_with_all_currency2('#purchase_price', purchase_price, 'EUR');
     CIF.plus('purchase', purchase_price);
+    //_update_view_with_all_currency2('#cif', CIF.status(), 'EUR');
     _update_view_with_all_currency('#cif', CIF.status());
   });// end of change function
 
@@ -246,9 +286,10 @@ $(document).ready(function(){
         return base_price + extra;
       }(base_price, length, width));
 
-    _update_view_with_all_currency('#transport', transport_price);
+    _update_view_with_all_currency2('#transport', transport_price, 'EUR');
     CIF.plus('transport', transport_price);
     CIF.update_weight(weight);
+    //_update_view_with_all_currency2('#cif', CIF.status(), 'EUR');
     _update_view_with_all_currency('#cif', CIF.status());
   }); // end of change function
 
@@ -261,11 +302,13 @@ $(document).ready(function(){
           '[<strong>+</strong> EUR ' + inspection_price + ']'
       );
       CIF.plus('inspection', inspection_price);
+      //_update_view_with_all_currency2('#cif', CIF.status(), 'EUR');
       _update_view_with_all_currency('#cif', CIF.status());
     } else {
       inspection_price = 0;
       $('#note-inspection_purchase').html('');
       CIF.plus('inspection', inspection_price);
+      //_update_view_with_all_currency2('#cif', CIF.status(), 'EUR');
       _update_view_with_all_currency('#cif', CIF.status());
     }
   });
@@ -297,8 +340,10 @@ $(document).ready(function(){
       var rate = $('#commission_value').text()/100;
       var value_commission = CIF.total() * rate;
       _update_view_with_all_currency('#commission', value_commission);
-      g_total['commission'] = value_commission;
-      total_compute_and_update_view();
+//      _update_view_with_all_currency2('#commission', value_commission, 'EUR');
+      //Total.add('commission', value_commission, 'EUR');
+      Total.add('commission', value_commission);
+      Total.compute_and_update_view();
     }
   });
 
@@ -316,9 +361,11 @@ $(document).ready(function(){
         var cif_value_usd = XE.from_eur_to_usd(g_cif_total_eur);
         var value_output_usd = this.func(cif_value_usd);
         var value_output_eur = XE.from_usd_to_eur(value_output_usd);
-        _update_view_with_all_currency(id, value_output_eur);
-        g_total[id] = value_output_eur;
-        total_compute_and_update_view();
+        //_update_view_with_all_currency2('#' + id, value_output_eur, 'EUR');
+        _update_view_with_all_currency('#' + id, value_output_eur);
+        //Total.add(id, value_output_eur, 'EUR');
+        Total.add(id, value_output_eur);
+        Total.compute_and_update_view();
       },
     };
 
@@ -333,14 +380,14 @@ $(document).ready(function(){
     var cif_dependent =
     [
       {
-        'id': '#commission',
+        'id': 'commission',
         'obj': _obj_maker(function(cif_value_usd){
           var rate = $('#commission_value').text()/100;
           return rate * cif_value_usd;
         })
       },
       {
-        'id': '#empadronamiento',
+        'id': 'empadronamiento',
         'obj': _obj_maker(function(cif_value_usd){
           console.log('Computing Cert. de Empadronamiento...');
           var x = _p($('#table_empadronamiento').data('value'));
@@ -351,7 +398,7 @@ $(document).ready(function(){
         })
       },
       {
-        'id': '#timbre',
+        'id': 'timbre',
         'obj': _obj_maker(function(cif_value_usd){
           console.log('Computing Timbre Professional...');
           var x = _p($('#table_timbre').data('value'));
@@ -362,7 +409,7 @@ $(document).ready(function(){
         })
       },
       {
-        'id': '#guia',
+        'id': 'guia',
         'obj': _obj_maker(function(cif_value_usd){
           console.log('Computing Guia de transito...');
           var x = _p($('#table_guia').data('value'));
@@ -373,7 +420,7 @@ $(document).ready(function(){
         })
       },
       {
-        'id': '#recargo',
+        'id': 'recargo',
         'obj': _obj_maker(function(cif_value_usd){
           console.log('Computing Recargo...');
           var rate = _p($('#table_recargo').data('value'));
@@ -387,7 +434,7 @@ $(document).ready(function(){
         })
       },
       {
-        'id': '#vat',
+        'id': 'vat',
         'obj': _obj_maker(function(cif_value_usd){
           console.log('Computing VAT...');
           var vat = _p($('#table_iva').data('iva')) +
@@ -401,7 +448,7 @@ $(document).ready(function(){
         })
       },
       {
-        'id': '#extrao',
+        'id': 'extrao',
         'obj': _obj_maker(function(cif_value_usd){
           console.log('Computing Extraordinarios Tax...');
           console.log('Lookup CIF value ('+ _r(cif_value_usd) +') in table...');
@@ -412,7 +459,7 @@ $(document).ready(function(){
         })
       },
       {
-        'id': '#puerto',
+        'id': 'puerto',
         'obj': _obj_maker(function(cif_value_usd){
           var weight = g_weight;
           console.log('Computing Puerto Tax...');
@@ -437,7 +484,7 @@ $(document).ready(function(){
         })
       },
       {
-        'id': '#despachante',
+        'id': 'despachante',
         'obj': _obj_maker(function(cif_value_usd){
           // Fix price in USD
           console.log('Computing Despachante fee...');
@@ -456,7 +503,7 @@ $(document).ready(function(){
         })
       },
       {
-        'id': '#tsa',
+        'id': 'tsa',
         'obj': _obj_maker(function(cif_value_usd){
           console.log('Computing TSA tax...');
           console.log('Lookup CIF value ('+ _r(cif_value_usd) +') in table...');
