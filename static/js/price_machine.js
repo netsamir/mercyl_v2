@@ -69,16 +69,13 @@ $(document).ready(function(){
     return {
       add: function(id, price, currency = 'USD'){
           if(currency === 'EUR'){
-          console.log(id, price, currency);
             price = XE.from_eur_to_usd(price);
-          console.log(id, price, currency);
           } else if (currency === 'UYU'){
             price = XE.from_uyu_to_usd(price);
           }
         total[id] = price;
       },
       compute_and_update_view: function(){
-        console.log(total);
         // Compute total of costs:
         // - Machine + Transport + Inspection : CIF
         // - Cost of Purchase and of Sale
@@ -567,10 +564,9 @@ $(document).ready(function(){
       usd_value = XE.from_eur_to_usd(value);
       uyu_value = XE.from_eur_to_uyu(value);
     }
-
-    $(id + ' :input[name="eur"]').val(_r(eur_value));
-    $(id + ' :input[name="usd"]').val(_r(usd_value));
-    $(id + ' :input[name="uyu"]').val(_r(uyu_value));
+    $(id + ' :input[name="eur"]').val(numeral(_r(eur_value)).format('0,0'));
+    $(id + ' :input[name="usd"]').val(numeral(_r(usd_value)).format('0,0'));
+    $(id + ' :input[name="uyu"]').val(numeral(_r(uyu_value)).format('0,0'));
   };
   function _p(x){
     return parseFloat(x)
