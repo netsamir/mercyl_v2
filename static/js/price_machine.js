@@ -6,7 +6,7 @@ $(document).ready(function(){
   var XE = (function(){
     // AP ID: 1bc44a86ebb244dcad64ceb38d56847f
     var currency = {
-      'usd_usd': 0,
+      'usd_usd': 0, // 1
       'usd_eur': 0,
       'usd_uyu': 0,
     };
@@ -67,19 +67,18 @@ $(document).ready(function(){
     };
 
     return {
-      //add: function(id, price, currency = 'USD'){
-      add: function(id, price){
-        // switch(currency){
-        //   case 'EUR':
-        //     price = XE.from_eur_to_usd(price);
-        //   case 'UYU':
-        //     price = XE.from_uyu_to_usd(price);
-        //   default:
-        // }
+      add: function(id, price, currency = 'USD'){
+          if(currency === 'EUR'){
+          console.log(id, price, currency);
+            price = XE.from_eur_to_usd(price);
+          console.log(id, price, currency);
+          } else if (currency === 'UYU'){
+            price = XE.from_uyu_to_usd(price);
+          }
         total[id] = price;
-        console.log(id, price);
       },
       compute_and_update_view: function(){
+        console.log(total);
         // Compute total of costs:
         // - Machine + Transport + Inspection : CIF
         // - Cost of Purchase and of Sale
@@ -87,48 +86,38 @@ $(document).ready(function(){
         // - All cost related to the CIF including the commission
         total_cost_with_commission = _.reduce(_.values(total), function(x, y){
           return x + y;}, 0);
-
         commission = total['commission'];
-        console.log('commission', commission);
         // Total Cost
         total_cost = total_cost_with_commission - commission;
         _update_view_with_all_currency2('#total_cost',
             total_cost, 'USD');
-        console.log('total_cost', total_cost);
         // Compute the selling price
         selling_price = total_cost + commission;
         _update_view_with_all_currency2('#selling_price',
            selling_price, 'USD');
-        console.log('selling_price', selling_price)
-        // // Compute vat
+        // Compute vat
         vat_sale = selling_price * 0.22;
         _update_view_with_all_currency2('#vat_sale',
             vat_sale, 'USD');
-        // // Compute Sale price with VAT
-        console.log('vat_sale', vat_sale);
-        // // Compute vat
+        // Compute Sale price with VAT
         selling_price_with_vat = selling_price + vat_sale;
         _update_view_with_all_currency2('#selling_price_with_vat',
             selling_price_with_vat, 'USD');
-        console.log('selling_price_with_vat', selling_price_with_vat)
-        // // Vat to pay
+        // Vat to pay
         vat_to_pay = vat_sale - total['vat'];
         _update_view_with_all_currency2('#vat_to_pay',
             vat_to_pay, 'USD');
-        console.log('vat_to_pay', vat_to_pay);
-        // // Cash Inflow
+        // Cash Inflow
         cash_inflow = selling_price_with_vat;
         if(vat_to_pay > 0){
           cash_inflow = selling_price_with_vat - vat_to_pay;
         };
         _update_view_with_all_currency2('#cash_inflow',
             cash_inflow, 'USD');
-        console.log('cash_inflow', cash_inflow);
-        // // Return before tax
+        // Return before tax
         return_before_tax = cash_inflow - total_cost;
         _update_view_with_all_currency2('#return_before_tax',
             return_before_tax, 'USD');
-        console.log('return_before_tax', return_before_tax);
       },// end of compute_and_update
     }
   }());
@@ -138,11 +127,11 @@ $(document).ready(function(){
    *******************************************/
   var CPCS = (function(){
     var cp_cs = [
-      {'id': 'purchase',
+      {'id': 'cost_of_purchase',
         'total': 0,
         'currency': 'EUR'
       },
-      {'id': 'sale',
+      {'id': 'cost_of_sale',
         'total': 0,
         'currency': 'USD'
       }
@@ -156,7 +145,7 @@ $(document).ready(function(){
           var id = elem['id']
           var total = 0;
           var price = 0;
-          $('#select_cost_of_' + id + ' input').each(function(){
+          $('#select_' + id + ' input').each(function(){
             if ($(this).is(':checked')){
               price = _p($(this).data('price'));
               total += price;
@@ -169,10 +158,9 @@ $(document).ready(function(){
             }
           }); // end of each
           elem['total'] = total;
-          _update_view_with_all_currency2('#cost_of_' + id,
+          _update_view_with_all_currency2('#' + id,
               elem['total'], elem['currency']);
-            //Total.add(id, total, elem['currency']);
-            Total.add(id, total);
+            Total.add(id, total, elem['currency']);
         }); // end of function $.each
         Total.compute_and_update_view();
       }, // end of compute_and_udpate_view
@@ -181,7 +169,7 @@ $(document).ready(function(){
 
   $.each(CPCS.selector(), function(key, elem){
     var id = elem['id']
-    $('#select_cost_of_' + id).change(function(){
+    $('#select_' + id).change(function(){
       CPCS.compute_and_update_view();
     });// end of change
   });
@@ -200,10 +188,8 @@ $(document).ready(function(){
         $.each(fix_costs, function(key, id){
             var price = _p($('#table_' + id).data('value'));
             var currency = $('#table_' + id).data('currency');
-            //_update_view_with_all_currency2('#' + id, price, currency);
-            _update_view_with_all_currency2('#' + id, price);
-            //Total.add(id, price, currency);
-            Total.add(id, price);
+            _update_view_with_all_currency2('#' + id, price, currency);
+            Total.add(id, price, currency);
         });
         Total.compute_and_update_view();
       },
@@ -246,10 +232,9 @@ $(document).ready(function(){
         // And update the differente value depending on CIF, ie Despachante.
         cif_total_eur = _.reduce(_.values(total), function(x, y){
           return x + y;}, 0);
+        Total.add('cif', cif_total_eur, 'EUR');
+        Total.compute_and_update_view()
         CIFFunctions().compute_and_update_view(cif_total_eur, weight);
-        //Total.add('cif', cif_total_eur, 'EUR');
-        Total.add('cif', cif_total_eur);
-        Total.compute_and_update_view();
         return cif_total_eur;
       }
     };
@@ -265,8 +250,7 @@ $(document).ready(function(){
     var purchase_price = $(this).val();
     _update_view_with_all_currency2('#purchase_price', purchase_price, 'EUR');
     CIF.plus('purchase', purchase_price);
-    //_update_view_with_all_currency2('#cif', CIF.status(), 'EUR');
-    _update_view_with_all_currency('#cif', CIF.status());
+    _update_view_with_all_currency2('#cif', CIF.status(), 'EUR');
   });// end of change function
 
   $('#select_machine').change(function(){
@@ -289,8 +273,7 @@ $(document).ready(function(){
     _update_view_with_all_currency2('#transport', transport_price, 'EUR');
     CIF.plus('transport', transport_price);
     CIF.update_weight(weight);
-    //_update_view_with_all_currency2('#cif', CIF.status(), 'EUR');
-    _update_view_with_all_currency('#cif', CIF.status());
+    _update_view_with_all_currency2('#cif', CIF.status(), 'EUR');
   }); // end of change function
 
   $('#select_inspection_purchase').change(function(){
@@ -302,14 +285,12 @@ $(document).ready(function(){
           '[<strong>+</strong> EUR ' + inspection_price + ']'
       );
       CIF.plus('inspection', inspection_price);
-      //_update_view_with_all_currency2('#cif', CIF.status(), 'EUR');
-      _update_view_with_all_currency('#cif', CIF.status());
+      _update_view_with_all_currency2('#cif', CIF.status(), 'EUR');
     } else {
       inspection_price = 0;
       $('#note-inspection_purchase').html('');
       CIF.plus('inspection', inspection_price);
-      //_update_view_with_all_currency2('#cif', CIF.status(), 'EUR');
-      _update_view_with_all_currency('#cif', CIF.status());
+      _update_view_with_all_currency2('#cif', CIF.status(), 'EUR');
     }
   });
 
@@ -339,10 +320,8 @@ $(document).ready(function(){
       $('#commission_value').text(ui.value);
       var rate = $('#commission_value').text()/100;
       var value_commission = CIF.total() * rate;
-      _update_view_with_all_currency('#commission', value_commission);
-//      _update_view_with_all_currency2('#commission', value_commission, 'EUR');
-      //Total.add('commission', value_commission, 'EUR');
-      Total.add('commission', value_commission);
+      _update_view_with_all_currency2('#commission', value_commission, 'EUR');
+      Total.add('commission', value_commission, 'EUR');
       Total.compute_and_update_view();
     }
   });
@@ -361,10 +340,8 @@ $(document).ready(function(){
         var cif_value_usd = XE.from_eur_to_usd(g_cif_total_eur);
         var value_output_usd = this.func(cif_value_usd);
         var value_output_eur = XE.from_usd_to_eur(value_output_usd);
-        //_update_view_with_all_currency2('#' + id, value_output_eur, 'EUR');
-        _update_view_with_all_currency('#' + id, value_output_eur);
-        //Total.add(id, value_output_eur, 'EUR');
-        Total.add(id, value_output_eur);
+        _update_view_with_all_currency2('#' + id, value_output_eur, 'EUR');
+        Total.add(id, value_output_eur, 'EUR');
         Total.compute_and_update_view();
       },
     };
@@ -552,22 +529,22 @@ $(document).ready(function(){
   /*
    * helper functions
    */
-  function _update_view_with_all_currency(id, eur_value){
-    // Because I am retrieving the information with USD Base
-    // I have to convert the value to USD before computing the UYU
-    // I keep the USD value based because it is easier to everyone
-    // to check its currency
-    //
-    // Condition:
-    // Value of eur_value should be in EUR
+  // function _update_view_with_all_currency(id, eur_value){
+  //   // Because I am retrieving the information with USD Base
+  //   // I have to convert the value to USD before computing the UYU
+  //   // I keep the USD value based because it is easier to everyone
+  //   // to check its currency
+  //   //
+  //   // Condition:
+  //   // Value of eur_value should be in EUR
 
-    usd_value = XE.from_eur_to_usd(eur_value);
-    uyu_value = XE.from_eur_to_uyu(eur_value);
+  //   usd_value = XE.from_eur_to_usd(eur_value);
+  //   uyu_value = XE.from_eur_to_uyu(eur_value);
 
-    $(id + ' :input[name="eur"]').val(_r(eur_value));
-    $(id + ' :input[name="usd"]').val(_r(usd_value));
-    $(id + ' :input[name="uyu"]').val(_r(uyu_value));
-  };
+  //   $(id + ' :input[name="eur"]').val(_r(eur_value));
+  //   $(id + ' :input[name="usd"]').val(_r(usd_value));
+  //   $(id + ' :input[name="uyu"]').val(_r(uyu_value));
+  // };
 
   function _update_view_with_all_currency2(id, value, currency){
     // Because I am retrieving the information with USD Base
